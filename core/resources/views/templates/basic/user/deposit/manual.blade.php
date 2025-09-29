@@ -1,0 +1,43 @@
+@extends($activeTemplate . 'layouts.frontend')
+@section('content')
+    <section class="my-80">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card custom--card">
+                        <div class="card-body  ">
+                            <form action="{{ route('user.deposit.manual.update') }}" method="POST" class="disableSubmission" enctype="multipart/form-data">
+                                @csrf
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="alert alert--primary align-items-center">
+                                            <div class="alert__icon">
+                                                <i class="las la-info-circle"></i>
+                                            </div>
+                                            <div class="alert__content">
+                                                <p class="alert__desc mb-0">
+                                                    @lang('You are requesting') <b>{{ showAmount($data['amount']) }}</b> @lang('to deposit.') @lang('Please pay')
+                                                    <b>{{ showAmount($data['final_amount'], currencyFormat: false) . ' ' . $data['method_currency'] }} </b> @lang('for successful payment.')
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">@php echo  $data->gateway->description @endphp</div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <x-viser-form identifier="id" identifierValue="{{ $gateway->form_id }}" />
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn--base w-100">@lang('Pay Now')</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection
+

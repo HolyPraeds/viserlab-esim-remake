@@ -1,0 +1,58 @@
+ФАЙЛЫ ДЛЯ СИСТЕМЫ ДЕПОЗИТОВ И ПОКУПОК
+
+=== КОНТРОЛЛЕРЫ ===
+core/app/Http/Controllers/User/DepositController.php
+core/app/Http/Controllers/User/PurchaseController.php
+core/app/Http/Controllers/User/PlanController.php (обновлен - добавлена оплата через баланс)
+core/app/Http/Controllers/Gateway/PaymentController.php (обновлен)
+
+=== МОДЕЛИ ===
+core/app/Models/Order.php
+core/app/Models/OrderItem.php
+core/app/Models/Esim.php
+core/app/Models/Deposit.php (обновлен)
+core/app/Models/User.php (обновлен)
+
+=== МАРШРУТЫ ===
+core/routes/web.php (обновлен)
+
+=== ШАБЛОНЫ ===
+core/resources/views/templates/basic/user/deposit/index.blade.php
+core/resources/views/templates/basic/user/deposit/deposit.blade.php
+core/resources/views/templates/basic/user/payment/deposit.blade.php (обновлен)
+core/resources/views/templates/basic/user/order/payment.blade.php (обновлен - добавлена оплата через баланс, изменен текст)
+core/resources/views/templates/basic/user/purchase/index.blade.php
+core/resources/views/templates/basic/user/purchase/show.blade.php
+core/resources/views/templates/basic/user/purchase/orders.blade.php
+core/resources/views/templates/basic/partials/dashboard_sidenav.blade.php (обновлен)
+core/resources/views/templates/basic/country_plans.blade.php (обновлен - добавлены кнопки Buy by Balance/Card)
+core/resources/views/templates/basic/region_plans.blade.php (обновлен - добавлены кнопки Buy by Balance/Card)
+
+=== МИГРАЦИИ ===
+core/database/migrations/2024_01_01_000001_create_orders_table.php
+core/database/migrations/2024_01_01_000002_create_esims_table.php
+core/database/migrations/2024_01_01_000003_add_order_id_to_deposits_table.php
+core/database/migrations/2024_01_01_000004_create_order_items_table.php
+
+=== ДОСТУПНЫЕ МАРШРУТЫ ===
+- /user/deposit - Пополнение баланса
+- /user/deposit/history - История депозитов
+- /user/purchase - Покупка eSIM
+- /user/purchase/{id} - Детали плана для покупки
+- /user/orders - Мои заказы
+
+=== ФУНКЦИОНАЛЬНОСТЬ ===
+✅ Пополнение баланса через Taurixy (единственный gateway)
+✅ Покупка eSIM с помощью внутреннего баланса
+✅ Покупка eSIM через Taurixy gateway
+✅ История депозитов и заказов
+✅ Автоматическое создание eSIM карт
+✅ Управление транзакциями
+✅ Красивый интерфейс для покупок
+✅ Упрощенная система - только нужные платежи
+
+=== ИНТЕГРАЦИЯ С СУЩЕСТВУЮЩЕЙ СИСТЕМОЙ ===
+- Использует существующие таблицы orders, esims, deposits
+- Совместим с текущей системой платежей
+- Поддерживает EUR как основную валюту
+- Интегрирован в существующий дизайн

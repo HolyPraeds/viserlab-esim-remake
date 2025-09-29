@@ -1,0 +1,53 @@
+ФАЙЛЫ ДЛЯ ЗАГРУЗКИ НА ПРОДАКШН СЕРВЕР
+=====================================
+
+1. ОСНОВНОЙ СКРИПТ ИСПРАВЛЕНИЯ:
+   - FINAL_PRODUCTION_FIX.php
+
+2. ОБНОВЛЕННЫЕ ФАЙЛЫ ШАБЛОНОВ:
+   - core/resources/views/templates/basic/country_plans.blade.php
+   - core/resources/views/templates/basic/region_plans.blade.php
+   - core/resources/views/templates/basic/user/payment/deposit.blade.php
+   - core/resources/views/templates/basic/partials/dashboard_sidenav.blade.php
+   - core/resources/views/templates/basic/partials/header.blade.php
+   - core/resources/views/templates/basic/user/dashboard.blade.php
+
+3. ОБНОВЛЕННЫЕ КОНТРОЛЛЕРЫ:
+   - core/app/Http/Controllers/Gateway/PaymentController.php
+   - core/app/Http/Controllers/SiteController.php
+
+4. ОБНОВЛЕННЫЕ МОДЕЛИ:
+   - core/app/Models/Plan.php
+   - core/app/Models/Currency.php
+   - core/app/Models/GeneralSetting.php
+   - core/app/Models/User.php
+
+5. ОБНОВЛЕННЫЕ ХЕЛПЕРЫ:
+   - core/app/Http/Helpers/helpers.php
+
+6. ОБНОВЛЕННЫЕ МАРШРУТЫ:
+   - core/routes/web.php
+
+ИНСТРУКЦИЯ ПО РАЗВЕРТЫВАНИЮ:
+============================
+
+1. Загрузите ВСЕ файлы выше на сервер в соответствующие папки
+2. Выполните команду на сервере:
+   php FINAL_PRODUCTION_FIX.php
+3. Проверьте результат на сайте
+
+ЧТО ИСПРАВИТ СКРИПТ:
+===================
+✅ Установит EUR как базовую валюту
+✅ Конвертирует все планы из USD в EUR
+✅ Создаст EUR версии всех gateway
+✅ Исправит политики
+✅ Очистит все кеши
+
+РЕЗУЛЬТАТ:
+==========
+- Все цены на сайте в EUR
+- Все депозиты работают в EUR
+- Баланс отображается в dashboard
+- Политики работают правильно
+- Никаких блоков конвертации валют
