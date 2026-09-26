@@ -62,7 +62,7 @@
                 </div>
                 <div class="dashboard-widget__content">
                     <span class="dashboard-widget__dot"></span>
-                    <h4 class="dashboard-widget__title">{{ showAmount(auth()->user()->balance) }}</h4>
+                    <h4 class="dashboard-widget__title">{{ showAmount(auth()->user()->balance, 2, true, false, true, true) }}</h4>
                 </div>
             </a>
         </div>
@@ -156,12 +156,12 @@
 
                                 <td>
                                     <span class="fw-bold @if ($trx->trx_type == '+') text--success @else text--danger @endif">
-                                        {{ $trx->trx_type }} {{ showAmount($trx->amount) }}
+                                        {{ $trx->trx_type }} {{ showAmount($trx->amount, 2, true, false, true, true) }}
                                     </span>
                                 </td>
 
                                 <td>
-                                    {{ showAmount($trx->post_balance) }}
+                                    {{ showAmount($trx->post_balance, 2, true, false, true, true) }}
                                 </td>
 
                                 <td>{{ __($trx->details) }}</td>

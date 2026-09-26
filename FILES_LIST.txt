@@ -1,0 +1,23 @@
+СПИСОК ФАЙЛОВ ДЛЯ АРХИВА (относительно папки core/):
+═══════════════════════════════════════════════════════════════
+
+1. resources/views/templates/basic/region_plans.blade.php
+2. resources/views/templates/basic/country_plans.blade.php
+3. resources/views/templates/basic/sections/coverage.blade.php
+4. resources/views/templates/basic/destination.blade.php
+5. resources/views/templates/basic/user/order/payment.blade.php
+6. app/Http/Controllers/User/PlanController.php
+7. app/Http/Controllers/User/OrderController.php
+8. app/Http/Controllers/ApiController.php
+9. app/Http/Helpers/helpers.php
+10. routes/api.php
+11. database/migrations/2025_12_22_000001_add_payment_currency_to_orders_table.php
+
+═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+

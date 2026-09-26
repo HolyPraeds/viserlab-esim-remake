@@ -35,7 +35,8 @@
                 </ul>
             </div>
             <div class="col-md-10 col-lg-6 col-xxl-7">
-                <img class="about-us__thumb" src="{{ asset('assets/images/frontend/about/68d1c594be8641758578068.jpg') }}" alt="about-image">
+                {{-- Use frontendImage (checks file on disk). On Linux extension must match exactly: .jpg not .JPG --}}
+                <img class="about-us__thumb" src="{{ frontendImage('about', '68d1c594be8641758578068.jpg') }}" alt="about-image">
             </div>
         </div>
     </div>

@@ -1,0 +1,37 @@
+═══════════════════════════════════════════════════════════════
+  ИСПРАВЛЕНИЕ ОШИБКИ: Route [api.currency.rates] not defined
+═══════════════════════════════════════════════════════════════
+
+❌ ПРОБЛЕМА:
+   Route [api.currency.rates] not defined
+
+✅ РЕШЕНИЕ:
+───────────────────────────────────────────────────────────────
+
+1. Убедиться, что файл `routes/api.php` обновлён на проде
+   (он должен содержать строку):
+   
+   Route::get('/currency/rates', [ApiController::class, 'currencyRates'])
+       ->name('api.currency.rates');
+
+2. Очистить кэш маршрутов (ОБЯЗАТЕЛЬНО!):
+   
+   cd core
+   php artisan route:clear
+   php artisan config:clear
+   php artisan cache:clear
+
+3. Проверить, что метод `currencyRates()` есть в `ApiController.php`
+
+4. Если ошибка остаётся, проверить логи:
+   
+   tail -f storage/logs/laravel.log
+
+═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+

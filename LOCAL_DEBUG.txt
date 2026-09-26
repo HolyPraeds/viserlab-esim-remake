@@ -1,0 +1,65 @@
+═══════════════════════════════════════════════════════════════
+  ОТЛАДКА НА ЛОКАЛЬНОЙ МАШИНЕ
+═══════════════════════════════════════════════════════════════
+
+ПРОБЛЕМА: Изменения не применяются на локальной машине
+
+ЧТО ПРОВЕРИТЬ:
+───────────────────────────────────────────────────────────────
+
+1. Очистить кэш браузера:
+   - Нажать Ctrl+Shift+Delete
+   - Выбрать "Кэшированные изображения и файлы"
+   - Очистить
+   - Или открыть в режиме инкогнито (Ctrl+Shift+N)
+
+2. Проверить, что файлы обновлены:
+   - Открыть в браузере: http://localhost/viserlab-esim-remake/
+   - Нажать F12 → вкладка Sources
+   - Найти файл coverage.blade.php
+   - Проверить функцию convertCoveragePrice - должна быть:
+     function convertCoveragePrice(amount, toCurrency) {
+       if (toCurrency === baseCurrency) {
+         return parseFloat(amount);
+       }
+       const rate = fixedRates[toCurrency] || 1.0;
+       return parseFloat(amount) * rate;
+     }
+
+3. Проверить консоль браузера (F12 → Console):
+   - Не должно быть ошибок JavaScript
+   - При клике на GBP должна быть конвертация
+
+4. Проверить, что кэши Laravel очищены:
+   cd core
+   php artisan view:clear
+   php artisan cache:clear
+   php artisan config:clear
+
+5. Проверить, что изменения в файлах:
+   - core/resources/views/templates/basic/sections/coverage.blade.php
+   - core/resources/views/templates/basic/partials/header.blade.php
+   - core/resources/views/templates/basic/destination.blade.php
+
+═══════════════════════════════════════════════════════════════
+  БЫСТРАЯ ПРОВЕРКА:
+═══════════════════════════════════════════════════════════════
+
+1. Откройте консоль браузера (F12)
+2. Введите в консоли:
+   
+   console.log('Base currency:', window.baseCurrency);
+   console.log('Current currency:', window.globalCurrency);
+   console.log('Fixed rates:', {EUR: 1.0, GBP: 0.87});
+   
+3. Нажмите на кнопку GBP
+4. Проверьте, что цены изменились
+
+═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+

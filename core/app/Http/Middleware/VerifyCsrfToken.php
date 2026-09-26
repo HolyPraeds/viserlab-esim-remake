@@ -18,6 +18,7 @@ class VerifyCsrfToken extends Middleware
         'user/deposit/*',
         'payment/*',
         'webhook/*',
+        'webhooks/*',
         'api/*',
     ];
 }

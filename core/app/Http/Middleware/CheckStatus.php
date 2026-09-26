@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Constants\Status;
 use Closure;
 use Auth;
 
@@ -18,6 +19,22 @@ class CheckStatus
     {
         if (Auth::check()) {
             $user = auth()->user();
+
+            // Deposit / checkout / wallet payment: only require active account (not full ev/sv/tv),
+            // otherwise local/test users get stuck on Authorization and "deposit doesn't work".
+            $routeName = $request->route()?->getName() ?? '';
+            $skipStrictVerification = $routeName !== '' && (
+                str_starts_with($routeName, 'user.deposit')
+                || str_starts_with($routeName, 'user.order.payment')
+                || $routeName === 'user.order.pay.from.wallet'
+                || $routeName === 'user.plan.purchase'
+                || $routeName === 'user.plan.buy.from.wallet'
+                || $routeName === 'user.purchase.index'
+            );
+            if ($skipStrictVerification && (int) $user->status === Status::USER_ACTIVE) {
+                return $next($request);
+            }
+
             if ($user->status  && $user->ev  && $user->sv  && $user->tv) {
                 return $next($request);
             } else {

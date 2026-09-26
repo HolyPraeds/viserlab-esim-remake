@@ -22,16 +22,20 @@ Maintain the security of your account credentials and promptly notify us of any 
 Failure to meet these requirements may result in the suspension or termination of your access to the Platform or Services.
 3. Description of Services
 BROOKBURN INTERNATIONAL LTD provides eSIMs that allow users to access mobile data and connectivity services through partner mobile network operators worldwide. Key aspects of our Services include:
-eSIM Activation: Upon purchase, you will receive a QR code or activation code to activate your eSIM on a compatible device. Instructions for activation will be provided at the time of purchase.
-Coverage and Performance: The availability, quality, and speed of mobile data services depend on the network operator and your geographic location. We do not guarantee uninterrupted, error-free, or high-speed connectivity, as these factors are controlled by third-party network providers.
-Plan Details: Each eSIM plan includes specific terms, such as data allowances, validity periods, and supported regions or countries, which are clearly outlined at the time of purchase.
-Device Compatibility: It is your responsibility to ensure that your device supports eSIM technology and is unlocked for use with our Services.
+3.1 eSIM Activation: 
+Upon purchase, you will receive a QR code or activation code to activate your eSIM on a compatible device. Instructions for activation will be provided at the time of purchase.
+3.2 Coverage and Performance: 
+The availability, quality, and speed of mobile data services depend on the network operator and your geographic location. We do not guarantee uninterrupted, error-free, or high-speed connectivity, as these factors are controlled by third-party network providers.
+3.3 Plan Details: 
+Each eSIM plan includes specific terms, such as data allowances, validity periods, and supported regions or countries, which are clearly outlined at the time of purchase.
+3.4 Device Compatibility: 
+It is your responsibility to ensure that your device supports eSIM technology and is unlocked for use with our Services.
 We strive to provide accurate information about coverage and plan details, but we are not liable for discrepancies caused by third-party network operators.
 4. Purchase and Payment Terms
 4.1 Order Placement
 All orders placed through our Platform are subject to our acceptance. We reserve the right to refuse or cancel any order at our sole discretion, including but not limited to cases of suspected fraud, unavailability of services, or errors in pricing or product descriptions.
 4.2 Pricing
-All prices for eSIMs and Services are listed in Euro (EUR) unless otherwise specified and include applicable taxes, such as Value Added Tax (VAT). We reserve the right to modify prices at any time without prior notice, though changes will not affect orders already confirmed.
+Costs for eSIMs and Services appear in Euro (EUR), USD ($) or GBP (£) except when noted otherwise and cover relevant fees like Value Added Tax (VAT). We can alter costs anytime without advance warning, but shifts won't impact already approved orders.
 4.3 Payment
 Payments must be made using the payment methods available on our Platform, such as credit/debit cards or other digital payment solutions. You agree to provide accurate and valid payment information and authorize us to charge the full amount for your order.
 4.4 No Refunds Policy
@@ -60,7 +64,7 @@ Changes to the terms, conditions, or availability of services provided by third-
 Any issues arising from your device’s compatibility, configuration, or settings, which may prevent the eSIM from functioning as intended.
 You acknowledge that third-party operators may impose additional terms or restrictions on the use of their networks, and you agree to comply with such terms.
 9. Privacy and Data Protection
-We are committed to protecting your personal information. Our collection, use, and disclosure of your data are governed by our Privacy Policy, available on our website travelsim.live. By using our Services, you consent to the processing of your personal information as described in the Privacy Policy. We may share your information with third-party network operators or service providers solely to facilitate the delivery of our Services.
+We are committed to protecting your personal information. Our collection, use, and disclosure of your data are governed by our <a href="{{ route('policy.pages', 'privacy-policy') }}" target="_blank">Privacy Policy</a>, available on our website travelsim.live. By using our Services, you consent to the processing of your personal information as described in the Privacy Policy. We may share your information with third-party network operators or service providers solely to facilitate the delivery of our Services.
 10. Termination of Access
 We reserve the right to suspend or terminate your access to the Platform or Services at our discretion, with or without notice, if you:
 Violate any provision of these Terms.
@@ -82,7 +86,7 @@ Email: support@travelsim.live
 Phone: Available on our website travelsim.live for customer support inquiries.
 We aim to respond to all inquiries within a reasonable timeframe, typically within 48 hours of receipt.
 15. Entire Agreement
-These Terms, together with our Privacy Policy and any other policies referenced herein, constitute the entire agreement between you and BROOKBURN INTERNATIONAL LTD regarding the use of our Platform and Services. They supersede any prior agreements, understandings, or representations, whether written or oral.
+These Terms, together with our <a href="{{ route('policy.pages', 'privacy-policy') }}" target="_blank">Privacy Policy</a> and any other policies referenced herein, constitute the entire agreement between you and BROOKBURN INTERNATIONAL LTD regarding the use of our Platform and Services. They supersede any prior agreements, understandings, or representations, whether written or oral.
 16. Severability
 If any provision of these Terms is found to be invalid or unenforceable by a court of competent jurisdiction, such provision shall be severed, and the remaining provisions shall continue in full force and effect.
 By accessing our Platform or purchasing our Services, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions in their entirety.</pre>

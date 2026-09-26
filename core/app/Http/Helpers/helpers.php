@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Notify\Notify;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Laramin\Utility\VugiChugi;
 
@@ -114,7 +115,7 @@ function getAmount($amount, $length = 2) {
     return $amount + 0;
 }
 
-function showAmount($amount, $decimal = 2, $separate = true, $exceptZeros = false, $currencyFormat = true) {
+function showAmount($amount, $decimal = 2, $separate = true, $exceptZeros = false, $currencyFormat = true, $useCredits = false) {
     $separator = '';
     if ($separate) {
         $separator = ',';
@@ -129,12 +130,22 @@ function showAmount($amount, $decimal = 2, $separate = true, $exceptZeros = fals
         }
     }
     if ($currencyFormat) {
-        if (gs('currency_format') == Status::CUR_BOTH) {
-            return gs('cur_sym') . $printAmount . ' ' . __(gs('cur_text'));
-        } elseif (gs('currency_format') == Status::CUR_TEXT) {
-            return $printAmount . ' ' . __(gs('cur_text'));
+        // Если useCredits = true, используем "Credits" (для баланса в личном кабинете)
+        // Иначе используем реальную валюту (EUR, GBP и т.д.)
+        if ($useCredits) {
+            $currencyText = 'Credits';
+            // Для кредитов не показываем символ валюты, только число и слово "Credits"
+            return $printAmount . ' ' . $currencyText;
         } else {
-            return gs('cur_sym') . $printAmount;
+            // Используем реальную валюту из настроек
+            $currencyText = gs('cur_text') ?: 'EUR';
+            if (gs('currency_format') == Status::CUR_BOTH) {
+                return gs('cur_sym') . $printAmount . ' ' . $currencyText;
+            } elseif (gs('currency_format') == Status::CUR_TEXT) {
+                return $printAmount . ' ' . $currencyText;
+            } else {
+                return gs('cur_sym') . $printAmount;
+            }
         }
     }
     return $printAmount;
@@ -145,7 +156,44 @@ function removeElement($array, $value) {
 }
 
 function cryptoQR($wallet) {
-    return "https://api.qrserver.com/v1/create-qr-code/?data=$wallet&size=300x300&ecc=m";
+    return "https://api.qrserver.com/v1/create-qr-code/?data=" . rawurlencode($wallet) . "&size=300x300&ecc=m";
+}
+
+/**
+ * Save QR code as PNG file for email attachment. Returns temp file path or null on failure.
+ * Uses api.qrserver.com; for very long strings (e.g. LPA > ~1.5K) may fail due to URL length.
+ */
+/**
+ * Remove .png from the end of a URL (e.g. https://p.qrsim.net/page.png -> https://p.qrsim.net/page).
+ * Used for eSIM QR links in emails and dashboard so links are without .png.
+ */
+function stripPngFromUrl(?string $url): ?string
+{
+    if ($url === null || $url === '' || !str_starts_with($url, 'http')) {
+        return $url;
+    }
+    return preg_replace('#\.png(\?|$)#i', '$1', $url);
+}
+
+function qrCodeToTempFile(string $data, string $filenamePrefix = 'esim-qr'): ?string
+{
+    $dir = storage_path('app/temp');
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+    $path = $dir . '/' . $filenamePrefix . '-' . uniqid() . '.png';
+    $url = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data=" . rawurlencode($data);
+    if (strlen($url) > 2000) {
+        return null;
+    }
+    $img = @file_get_contents($url);
+    if ($img === false || strlen($img) < 100) {
+        return null;
+    }
+    if (@file_put_contents($path, $img) === false) {
+        return null;
+    }
+    return $path;
 }
 
 function keyToTitle($text) {
@@ -208,11 +256,12 @@ function getImage($image, $size = null) {
     return asset('assets/images/default.png');
 }
 
-function notify($user, $templateName, $shortCodes = null, $sendVia = null, $createLog = true, $pushImage = null) {
+function notify($user, $templateName, $shortCodes = null, $sendVia = null, $createLog = true, $pushImage = null, $emailAttachments = null) {
     $globalShortCodes = [
         'site_name'       => gs('site_name'),
         'site_currency'   => gs('cur_text'),
         'currency_symbol' => gs('cur_sym'),
+        'site_logo'       => siteLogo(), // full URL for email logo
     ];
 
     if (gettype($user) == 'array') {
@@ -221,13 +270,14 @@ function notify($user, $templateName, $shortCodes = null, $sendVia = null, $crea
 
     $shortCodes = array_merge($shortCodes ?? [], $globalShortCodes);
 
-    $notify               = new Notify($sendVia);
-    $notify->templateName = $templateName;
-    $notify->shortCodes   = $shortCodes;
-    $notify->user         = $user;
-    $notify->createLog    = $createLog;
-    $notify->pushImage    = $pushImage;
-    $notify->userColumn   = isset($user->id) ? $user->getForeignKey() : 'user_id';
+    $notify                  = new Notify($sendVia);
+    $notify->templateName    = $templateName;
+    $notify->shortCodes      = $shortCodes;
+    $notify->user            = $user;
+    $notify->createLog       = $createLog;
+    $notify->pushImage       = $pushImage;
+    $notify->emailAttachments = $emailAttachments ?? [];
+    $notify->userColumn      = isset($user->id) ? $user->getForeignKey() : 'user_id';
     $notify->send();
 }
 
@@ -433,6 +483,78 @@ function gs($key = null) {
     return $general;
 }
 
+/**
+ * AlpPay payment state from API (COMPLETED, PENDING, …) or null on error.
+ */
+function alppayFetchPaymentState(\App\Models\Deposit $deposit): ?string
+{
+    if (!$deposit->gateway_trx) {
+        return null;
+    }
+    $baseUrl = config('alppay.base_url');
+    $apiKey = config('alppay.api_key');
+    $shopId = config('alppay.shop_id');
+    $headers = [];
+    if (!empty($shopId)) {
+        $headers['Shop-Id'] = $shopId;
+    }
+    try {
+        $res = Http::withToken($apiKey)
+            ->acceptJson()
+            ->withHeaders($headers)
+            ->get(rtrim($baseUrl, '/') . '/api/v1/payments/' . $deposit->gateway_trx);
+        if (!$res->ok()) {
+            \Illuminate\Support\Facades\Log::warning('AlpPay GET payment failed', [
+                'status' => $res->status(),
+                'deposit_trx' => $deposit->trx,
+                'gateway_trx' => $deposit->gateway_trx,
+                'body_snippet' => substr($res->body(), 0, 500),
+            ]);
+            return null;
+        }
+        $json = $res->json();
+        $state = data_get($json, 'result.state') ?? data_get($json, 'state') ?? data_get($json, 'data.state');
+        return $state ? strtoupper((string) $state) : null;
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::warning('AlpPay GET payment exception', [
+            'deposit_trx' => $deposit->trx,
+            'error' => $e->getMessage(),
+        ]);
+        return null;
+    }
+}
+
+/**
+ * Poll AlpPay for pending wallet deposits and credit balance if payment completed (webhook fallback).
+ */
+function finalizePendingAlpPayDepositsForUser(?\App\Models\User $user): void
+{
+    if (!$user) {
+        return;
+    }
+    $deposits = \App\Models\Deposit::where('user_id', $user->id)
+        ->where('order_id', 0)
+        ->whereIn('status', [Status::PAYMENT_INITIATE, Status::PAYMENT_PENDING])
+        ->whereNotNull('gateway_trx')
+        ->orderByDesc('id')
+        ->limit(5)
+        ->get();
+    foreach ($deposits as $deposit) {
+        $state = alppayFetchPaymentState($deposit);
+        if ($state !== 'COMPLETED') {
+            continue;
+        }
+        try {
+            \App\Http\Controllers\Gateway\PaymentController::userDataUpdate($deposit->fresh());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('finalizePendingAlpPayDeposits: failed', [
+                'trx' => $deposit->trx,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+}
+
 function getCachedCountries() {
     return Cache::rememberForever('active_countries_with_plans', function () {
         return Country::with('plans.region')->active()->get();
@@ -447,6 +569,34 @@ function isImage($string) {
     } else {
         return false;
     }
+}
+
+/**
+ * Get currency rate from database
+ */
+function getCurrencyRate($currencyCode) {
+    $currency = \App\Models\Currency::where('api_currency', $currencyCode)->first();
+    return $currency ? (float)$currency->conversion_rate : 1.0;
+}
+
+/**
+ * Convert currency amount
+ */
+function convertCurrency($amount, $fromCurrency, $toCurrency) {
+    if ($fromCurrency === $toCurrency) {
+        return $amount;
+    }
+    
+    // Get rates
+    $fromRate = getCurrencyRate($fromCurrency);
+    $toRate = getCurrencyRate($toCurrency);
+    
+    // Convert: amount * (toRate / fromRate)
+    if ($fromRate > 0) {
+        return $amount * ($toRate / $fromRate);
+    }
+    
+    return $amount;
 }
 
 function isHtml($string) {
@@ -533,6 +683,7 @@ function userReferralCommission($user) {
 
     $transaction               = new Transaction();
     $transaction->user_id      = $referrer->id;
+    $transaction->order_id     = 0;
     $transaction->amount       = $referralAmount;
     $transaction->post_balance = $referrer->balance;
     $transaction->charge       = 0;
@@ -557,6 +708,28 @@ function showPlanCapacity($plan) {
     return $plan->capacity < 0 ? __('Unlimited') : $plan->capacity . ' ' . $plan->capacity_unit;
 }
 
+/**
+ * Price shown to customers and charged at checkout (EUR base before GBP/USD conversion).
+ */
+function planCustomerPrice($plan): float
+{
+    if (!$plan) {
+        return 0.0;
+    }
+
+    $base = (float) ($plan->price ?? 0);
+    if ($base < 0.01) {
+        $base = (float) ($plan->retail_price ?? 0);
+    }
+
+    $divisor = (float) config('plans.customer_price_divisor', 4);
+    if ($divisor <= 1) {
+        return round($base, 2);
+    }
+
+    return round($base / $divisor, 2);
+}
+
 function getRegions(array $exclude = [], array $only = []) {
     $query = Region::active();
 
@@ -567,11 +740,11 @@ function getRegions(array $exclude = [], array $only = []) {
         $query->whereIn('name', $only);
     }
     return $query->whereHas('plans', fn($q) =>
-    $q->active()->whereHas('countries', fn($country) => $country->active()))
-        ->with(['plans' => fn($q) => $q->active()->with('countries')])
+    $q->active()->withPositivePrice()->whereHas('countries', fn($country) => $country->active()))
+        ->with(['plans' => fn($q) => $q->active()->withPositivePrice()->with('countries')])
         ->get()
         ->map(function ($region) {
-            $validPlans = $region->plans->filter(fn($p) => $p->countries->isNotEmpty());
+            $validPlans = $region->plans->filter(fn($p) => $p->countries->isNotEmpty() && planCustomerPrice($p) >= 0.01);
             $plan       = $validPlans->sortBy('converted_price')->first();
 
             return [
@@ -643,7 +816,7 @@ function mapRegionNameBySlug(?string $slug, ?string $name): ?string {
  */
 function getCanonicalRegionsForFrontend(): array {
     $regions = Region::active()->with(['plans' => function($q){
-        $q->active()->with('countries');
+        $q->active()->withPositivePrice()->with('countries');
     }])->get();
 
     $buckets = [
@@ -654,7 +827,7 @@ function getCanonicalRegionsForFrontend(): array {
         $bucket = mapRegionNameBySlug($region->slug, $region->name);
         if (!isset($buckets[$bucket])) continue;
         
-        $validPlans = $region->plans->filter(fn($p) => $p->countries->isNotEmpty());
+        $validPlans = $region->plans->filter(fn($p) => $p->countries->isNotEmpty() && planCustomerPrice($p) >= 0.01);
         if ($validPlans->isEmpty()) continue;
         
         // Собираем уникальные страны из всех планов региона
@@ -698,8 +871,9 @@ function getCanonicalRegionsForFrontend(): array {
  * Identify global plans by coverage breadth (plans linked to many countries across multiple buckets).
  */
 function getGlobalRegionsForFrontend(): array {
-    $plans = \App\Models\Plan::active()->with('countries', 'region', 'currency')->get();
+    $plans = \App\Models\Plan::active()->withPositivePrice()->with('countries', 'region', 'currency')->get();
     $globalCandidates = $plans->filter(function($p){
+        if (planCustomerPrice($p) < 0.01) return false;
         $countryCodes = $p->countries->pluck('code')->all();
         $num = count($countryCodes);
         if ($num < 20) return false; // heuristic
@@ -725,9 +899,13 @@ function getGlobalRegionsForFrontend(): array {
 
 function getCountries() {
     return Country::active()->where('is_featured', Status::ENABLE)
+        ->whereHas('plans', function ($query) {
+            $query->active()->withPositivePrice()->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
+        })
         ->with(['plans' => function ($query) {
             $query
                 ->active()
+                ->withPositivePrice()
                 ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
         }])
         ->get()

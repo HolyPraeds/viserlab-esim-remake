@@ -30,20 +30,17 @@
                 </div>
 
                 @if(!empty($alppayEnabled))
-                <form id="alppayRedirectForm" action="{{ route('user.deposit.alppay.create') }}" method="POST" class="mb-3">
+                <form id="alppayRedirectForm" action="{{ route('user.deposit.alppay.create') }}" method="POST" class="mb-2">
                     @csrf
                     <input type="hidden" name="deposit_trx" value="{{ $deposit->trx }}">
                     <button type="submit" class="btn btn--primary btn-lg w-100">
                         @lang('Pay by Card')
                     </button>
                 </form>
-                <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Автоматически отправляем форму для мгновенного перехода на платежную страницу
-                    var f = document.getElementById('alppayRedirectForm');
-                    if (f) { f.submit(); }
-                });
-                </script>
+                <p class="text-center text-muted small my-2">— @lang('or') —</p>
+                <a href="{{ route('user.deposit.alppay.h2h.create', ['deposit_trx' => $deposit->trx]) }}" class="btn btn-outline--primary btn-lg w-100 mb-3">
+                    @lang('Pay by Card (H2H)')
+                </a>
                 @endif
 
                 <a href="{{ route('user.deposit.history') }}" class="btn btn-outline--base w-100">@lang('Go to Deposit History')</a>

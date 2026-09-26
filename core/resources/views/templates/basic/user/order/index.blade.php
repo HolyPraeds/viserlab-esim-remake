@@ -16,7 +16,13 @@
                 @forelse ($orders as $order)
                     <tr>
                         <td>{{ $order->order_number }}</td>
-                        <td class="text-center">{{ __($order->orderItem->plan->name) }} ({{ $order->orderItem->plan->capacity . $order->orderItem->plan->capacity_unit . ' - ' . $order->orderItem->plan->period . ' ' . __('days') }})</td>
+                        <td class="text-center">
+                            @if($order->orderItem && $order->orderItem->plan)
+                                {{ __($order->orderItem->plan->name) }} ({{ $order->orderItem->plan->capacity . $order->orderItem->plan->capacity_unit . ' - ' . $order->orderItem->plan->period . ' ' . __('days') }})
+                            @else
+                                <span class="text-muted">@lang('Plan information not available')</span>
+                            @endif
+                        </td>
                         <td class="text-center">{{ showAmount($order->total_amount) }}</td>
                         <td> @php echo $order->statusBadge @endphp</td>
                         <td>

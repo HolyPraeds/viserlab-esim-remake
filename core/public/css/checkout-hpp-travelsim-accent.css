@@ -1,0 +1,123 @@
+/**
+ * Checkout HPP — Travelsim ACCENT (primary-цвет с сайта)
+ * Фиолетовая кнопка и подчёркивания полей — палитра --primary (253, 100%, 61%).
+ * Подключить: .../css/checkout-hpp-travelsim-accent.css
+ */
+
+#content {
+  background: #f5f5f5 !important;
+}
+
+#side-info-card,
+.MuiCard-root#side-info-card {
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid #e5e5e5 !important;
+}
+
+#side-info-card .MuiCardContent-root,
+#side-info-card h5,
+#side-info-card .MuiBox-root {
+  color: #1e2337 !important;
+}
+
+#logo-img.branding-logo {
+  content: url("https://travelsim.live/assets/images/logo_icon/logo_dark.png?v=1759441050");
+  filter: none !important;
+  max-height: 48px !important;
+  object-fit: contain !important;
+}
+
+#logo-wrapper {
+  background: transparent !important;
+}
+
+#logo-wrapper img {
+  content: url("https://travelsim.live/assets/images/logo_icon/logo_dark.png?v=1759441050");
+}
+
+#content > div:last-child {
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid #e5e5e5 !important;
+}
+
+#CHECKOUT-card-content-header {
+  color: #1e2337 !important;
+  font-weight: 600 !important;
+}
+
+.MuiFormLabel-root,
+.MuiInputLabel-root,
+.MuiInputBase-input,
+.MuiInput-input {
+  color: #1e2337 !important;
+}
+
+.MuiFormLabel-root.Mui-focused,
+.MuiInputLabel-root.Mui-focused {
+  color: #1e2337 !important;
+}
+
+/* Primary (фиолетовый) для полей */
+.MuiInput-underline:before,
+.MuiInput-underline:after {
+  border-bottom-color: hsl(253, 100%, 61%) !important;
+}
+
+.MuiInput-underline:hover:not(.Mui-disabled):before {
+  border-bottom-color: hsl(253, 100%, 51%) !important;
+}
+
+.MuiFormHelperText-root.Mui-error {
+  color: #d32f2f !important;
+}
+
+.MuiInputBase-root.Mui-error .MuiInput-underline:before {
+  border-bottom-color: #d32f2f !important;
+}
+
+.text-primaryGrey-600 {
+  color: #525252 !important;
+}
+
+/* Кнопка — primary (фиолетовый) как в палитре сайта */
+button.MuiButton-containedPrimary,
+.MuiButton-root.MuiButton-contained {
+  background: hsl(253, 100%, 61%) !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+}
+
+button.MuiButton-containedPrimary:hover,
+.MuiButton-root.MuiButton-contained:hover {
+  background: hsl(253, 100%, 51%) !important;
+  color: #ffffff !important;
+}
+
+button.MuiButton-containedPrimary + div,
+button.MuiButton-contained + div,
+.MuiButton-root.MuiButton-contained + div,
+div.text-xxs.break-words,
+.w-full.break-words.px-5.text-xxs {
+  margin-top: 1rem !important;
+  padding: 0.5rem 0 0 !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+  color: #6e6f70 !important;
+  text-align: center !important;
+  letter-spacing: 0.02em !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+}
+
+button.MuiButton-containedPrimary + div,
+button.MuiButton-contained + div,
+.MuiButton-root.MuiButton-contained + div {
+  border-top: 1px solid #e5e5e5 !important;
+  padding-top: 0.75rem !important;
+  margin-top: 1.25rem !important;
+}

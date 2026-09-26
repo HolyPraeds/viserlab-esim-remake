@@ -38,6 +38,7 @@ Route::controller('User\PlanController')->prefix('plan')->name('user.plan.')->gr
     Route::match(['GET', 'POST'], 'purchase', 'purchase')->name('purchase');
 });
 Route::controller('User\OrderController')->name('user.order.')->prefix('order')->group(function () {
+    Route::get('payment/return/{id?}/{referenceId?}/{state?}/{type?}', 'paymentReturn')->name('payment.return')->where(['state' => '.*']);
     Route::get('payment/success', 'paymentSuccess')->name('payment.success');
     Route::get('payment/{id}', 'payment')->name('payment');
     Route::post('payment/initiate', 'paymentInitiate')->name('payment.initiate');
@@ -46,6 +47,9 @@ Route::controller('User\OrderController')->name('user.order.')->prefix('order')-
 
 // Temporarily allow guest access to user routes for checkout flow
 Route::name('user.')->group(function () {
+
+    // Shorthand /purchase URL (same as plan purchase; must not be behind registration.complete)
+    Route::get('purchase', 'User\PlanController@purchase')->name('purchase.index');
 
     Route::get('user-data', 'User\UserController@userData')->name('data');
     Route::post('user-data-submit', 'User\UserController@userDataSubmit')->name('data.submit');
@@ -92,24 +96,16 @@ Route::name('user.')->group(function () {
                 Route::post('change-password', 'submitPassword');
             });
 
-            // plan purchase + shorthand links used in UI
+            // Wallet-only plan purchase (must stay behind check.status; do not duplicate user.plan.purchase — see public block above)
             Route::controller('PlanController')->prefix('plan')->name('plan.')->group(function () {
-                Route::match(['GET','POST'],'purchase', 'purchase')->name('purchase');
                 Route::post('buy-from-wallet', 'buyFromWallet')->name('buy.from.wallet');
             });
-            // alias used in menu: user.purchase.index
-            Route::get('purchase', 'PlanController@purchase')->name('purchase.index');
 
-            // order (logged-in only; public routes defined above)
+            // Logged-in order list + wallet pay only (payment page & AlpPay routes are public above to avoid duplicate route names)
             Route::controller('OrderController')->name('order.')->prefix('order')->group(function () {
                 Route::get('pending', 'pending')->name('pending');
                 Route::get('completed', 'completed')->name('completed');
-
-                Route::get('payment/success', 'paymentSuccess')->name('payment.success');
-                Route::get('payment/{id}', 'payment')->name('payment');
                 Route::post('payment/{id}/pay-from-wallet', 'payFromWallet')->name('pay.from.wallet');
-                Route::post('payment/initiate', 'paymentInitiate')->name('payment.initiate');
-                Route::post('payment/taurixy-direct', 'taurixyDirect')->name('payment.taurixy.direct');
             });
 
             // eSIM
@@ -135,7 +131,6 @@ Route::name('user.')->group(function () {
             Route::post('manual', 'manualDepositUpdate')->name('manual.update');
         });
 
-        // Alp-Pay create (Redirect flow)
-        Route::post('deposit/alppay/create', 'Gateway\AlpPayController@create')->name('deposit.alppay.create');
+        // Alp-Pay deposit/create is registered in routes/web.php (GET|POST) — do not duplicate here.
     });
 });

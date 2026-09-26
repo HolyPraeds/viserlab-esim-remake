@@ -9,23 +9,27 @@ use Illuminate\Support\Facades\Validator;
 
 class EsimController extends Controller {
     public function active() {
+        // Repair: ensure completed orders that have purchase_id but no Esims get eSIM records from API
+        dataPlans()->repairMissingEsimsForUser(auth()->user());
+
         $pageTitle = 'Active eSIMs';
-        $esims = Esim::active()->where('user_id', auth()->id())->with('orderItem.plan')->orderBy('id', 'DESC')->paginate(getPaginate());
+        $esims = Esim::active()->where('user_id', auth()->id())->with('orderItem.plan', 'orderItem.order')->orderBy('id', 'DESC')->paginate(getPaginate());
         return view('Template::user.esims', compact('pageTitle', 'esims'));
     }
 
     public function expired() {
         $pageTitle = 'Expired eSIMs';
-        $esims = Esim::expired()->where('user_id', auth()->id())->with('orderItem.plan')->orderBy('id', 'DESC')->paginate(getPaginate());
+        $esims = Esim::expired()->where('user_id', auth()->id())->with('orderItem.plan', 'orderItem.order')->orderBy('id', 'DESC')->paginate(getPaginate());
         return view('Template::user.esims', compact('pageTitle', 'esims'));
     }
 
     public function getQrCode($id) {
         $esim = Esim::active()->where('user_id', auth()->id())->findOrFail($id);
+        $qr = (str_starts_with($esim->qr_code ?? '', 'http')) ? stripPngFromUrl($esim->qr_code) : cryptoQR($esim->qr_code);
 
         return response()->json([
             'status' => 'ACTIVE',
-            'qr'     => cryptoQR($esim->qr_code),
+            'qr'     => $qr,
         ]);
     }
 

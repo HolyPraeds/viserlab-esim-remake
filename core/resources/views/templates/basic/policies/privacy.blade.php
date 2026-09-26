@@ -14,7 +14,7 @@ We collect various types of information to provide and improve our Services. Thi
 2.1 Personal Information
 Personal information is data that can identify you, either directly or indirectly. We may collect:
 Contact Information: Your name, email address, phone number, and billing address provided during account registration or purchase.
-Payment Information: Credit/debit card details, payment method details, or other financial information processed through secure third-party payment providers.
+Payment Information: Credit/debit card details, payment method details, or other financial information processed through secure third-party payment providers. We do not store your full card details (card number, CVV/CVC) on our servers. Card payments are processed securely by PCI-DSS compliant third-party payment providers, and cardholder data is not retained by us after the transaction is complete.
 Account Information: Username, password, and other credentials used to access your account on our Platform.
 Communication Data: Information you provide when contacting us, such as inquiries, feedback, or support requests, including any correspondence via email or phone.
 2.2 Non-Personal Information

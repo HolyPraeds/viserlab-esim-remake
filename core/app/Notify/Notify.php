@@ -74,6 +74,13 @@ class Notify
 	public $pushImage;
 
     /**
+    * Email attachments: array of ['path' => path, 'name' => filename]
+    *
+    * @var array
+    */
+	public $emailAttachments = [];
+
+    /**
     * Assign value to sendVia and setting property
     *
     * @param null $sendVia
@@ -112,6 +119,7 @@ class Notify
 			$notify->createLog = $this->createLog;
 			$notify->userColumn = $this->userColumn;
 			$notify->pushImage = $this->pushImage;
+			$notify->emailAttachments = $this->emailAttachments ?? [];
 			$notify->send();
 		}
 	}

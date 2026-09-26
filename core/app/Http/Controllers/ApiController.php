@@ -20,6 +20,7 @@ class ApiController extends Controller
             $countries = Country::active()
                 ->with(['plans' => function ($query) {
                     $query->active()
+                        ->withPositivePrice()
                         ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
                 }])
                 ->get()
@@ -64,6 +65,7 @@ class ApiController extends Controller
         try {
             $country = Country::with(['plans' => function ($query) {
                 $query->active()
+                    ->withPositivePrice()
                     ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
             }])
             ->active()
@@ -84,7 +86,7 @@ class ApiController extends Controller
                     'capacity' => $plan->capacity,
                     'capacity_unit' => $plan->capacity_unit,
                     'period' => $plan->period,
-                    'price' => $plan->price,
+                    'price' => planCustomerPrice($plan),
                     'converted_price' => $plan->converted_price,
                     'currency' => $plan->currency?->currency_code ?? 'USD',
                     'operator_name' => $plan->operator_name,
@@ -129,6 +131,7 @@ class ApiController extends Controller
             $regions = Region::active()
                 ->with(['plans' => function ($query) {
                     $query->active()
+                        ->withPositivePrice()
                         ->whereHas('countries', fn($q) => $q->active());
                 }])
                 ->get()
@@ -172,6 +175,7 @@ class ApiController extends Controller
         try {
             $region = Region::with(['plans' => function ($query) {
                 $query->active()
+                    ->withPositivePrice()
                     ->whereHas('countries', fn($q) => $q->active());
             }])
             ->active()
@@ -192,7 +196,7 @@ class ApiController extends Controller
                     'capacity' => $plan->capacity,
                     'capacity_unit' => $plan->capacity_unit,
                     'period' => $plan->period,
-                    'price' => $plan->price,
+                    'price' => planCustomerPrice($plan),
                     'converted_price' => $plan->converted_price,
                     'currency' => $plan->currency?->currency_code ?? 'USD',
                     'operator_name' => $plan->operator_name,
@@ -243,10 +247,13 @@ class ApiController extends Controller
             }
 
             $countries = Country::active()
-                ->where('name', 'like', "%{$query}%")
-                ->orWhere('code', 'like', "%{$query}%")
+                ->where(function($q) use ($query) {
+                    $q->where('name', 'like', "%{$query}%")
+                      ->orWhere('code', 'like', "%{$query}%");
+                })
                 ->with(['plans' => function ($query) {
                     $query->active()
+                        ->withPositivePrice()
                         ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
                 }])
                 ->get()
@@ -290,6 +297,7 @@ class ApiController extends Controller
     {
         try {
             $plans = Plan::active()
+                ->withPositivePrice()
                 ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE))
                 ->whereHas('countries', fn($q) => $q->active())
                 ->with(['countries', 'region', 'currency'])
@@ -301,7 +309,7 @@ class ApiController extends Controller
                         'capacity' => $plan->capacity,
                         'capacity_unit' => $plan->capacity_unit,
                         'period' => $plan->period,
-                        'price' => $plan->price,
+                        'price' => planCustomerPrice($plan),
                         'converted_price' => $plan->converted_price,
                         'currency' => $plan->currency?->currency_code ?? 'USD',
                         'operator_name' => $plan->operator_name,
@@ -348,6 +356,7 @@ class ApiController extends Controller
     {
         try {
             $plan = Plan::active()
+                ->withPositivePrice()
                 ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE))
                 ->whereHas('countries', fn($q) => $q->active())
                 ->with(['countries', 'region', 'currency'])
@@ -366,7 +375,7 @@ class ApiController extends Controller
                 'capacity' => $plan->capacity,
                 'capacity_unit' => $plan->capacity_unit,
                 'period' => $plan->period,
-                'price' => $plan->price,
+                'price' => planCustomerPrice($plan),
                 'converted_price' => $plan->converted_price,
                 'currency' => $plan->currency?->currency_code ?? 'USD',
                 'operator_name' => $plan->operator_name,

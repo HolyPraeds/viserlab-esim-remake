@@ -30,6 +30,9 @@ class UserController extends Controller {
 
         $pageTitle = 'Dashboard';
         $user = auth()->user();
+        // After card deposit return, webhook may be delayed — poll AlpPay so balance updates without opening Deposit History
+        finalizePendingAlpPayDepositsForUser($user);
+
         $widget['total_esim']   = Esim::where('user_id', $user->id)->count();
         $widget['active_esim']  = Esim::where('user_id', $user->id)->with('orderItem', 'orderItem.plan')->where('expiry_date', '>=', now())->count();
         $widget['expired_esim'] = Esim::where('user_id', $user->id)->with('orderItem', 'orderItem.plan')->where('expiry_date', '<', now())->count();

@@ -8,7 +8,7 @@
                     <span class="user-profile__name">{{ auth()->user()->fullname }}</span>
                     <span class="user-profile__username">{{ auth()->user()->username }}</span>
                     <div class="user-profile__balance" style="margin-top: 5px; padding: 5px 10px; background: rgba(255,255,255,0.1); border-radius: 15px; font-size: 12px; font-weight: 600;">
-                        <span style="color: #F9C80E;">💰 {{ showAmount(auth()->user()->balance) }}</span>
+                        <span style="color: #F9C80E;">💰 {{ showAmount(auth()->user()->balance, 2, true, false, true, true) }}</span>
                     </div>
                 </div>
             </div>
@@ -78,6 +78,15 @@
                             <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
                         </svg>
                         @lang('Completed Orders')
+                    </a>
+                </li>
+                <li class="offcanvas-sidebar-menu__item {{ menuActive('user.order.track') }}">
+                    <a class="offcanvas-sidebar-menu__link" href="{{ route('user.order.track') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        @lang('Track Order')
                     </a>
                 </li>
                 <li class="offcanvas-sidebar-menu__item">

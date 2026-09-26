@@ -22,6 +22,11 @@ class Order extends Model
         return $this->hasOne(OrderItem::class);
     }
 
+    public function deposits()
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
     public function scopeInitiated($query){
         return $query->where('status', Status::ORDER_INITIATE);
     }

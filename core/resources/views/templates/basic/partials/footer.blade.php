@@ -40,6 +40,11 @@
                                     </a>
                                 </li>
                             @endforeach
+                            <li class="social-list__item">
+                                <a href="https://www.facebook.com/profile.php?id=61580776751642" class="social-list__link flex-center" target="_blank" rel="noopener noreferrer">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -50,7 +55,9 @@
                             <li class="footer-menu__item"><a href="{{ route('home') }}" class="footer-menu__link">@lang('Home')</a></li>
                             <li class="footer-menu__item"><a href="{{ route('destination') }}" class="footer-menu__link">@lang('Destination')</a>
                             </li>
-                            <li class="footer-menu__item"><a href="{{ route('blogs') }}" class="footer-menu__link">@lang('Blog')</a></li>
+                            @auth
+                                <li class="footer-menu__item"><a href="{{ route('user.order.track') }}" class="footer-menu__link">@lang('Track Order')</a></li>
+                            @endauth
                             <li class="footer-menu__item"><a href="{{ route('contact') }}" class="footer-menu__link">@lang('Contact Us')</a></li>
                         </ul>
                     </div>
@@ -64,6 +71,8 @@
                             <li class="footer-menu__item"><a href="{{ route('policy.pages', 'cookies-policy') }}" class="footer-menu__link">@lang('Cookies Policy')</a></li>
                             <li class="footer-menu__item"><a href="{{ route('policy.pages', 'refund-policy') }}" class="footer-menu__link">@lang('Refund Policy')</a></li>
                             <li class="footer-menu__item"><a href="{{ route('policy.pages', 'disclosure-disclaimer') }}" class="footer-menu__link">@lang('Disclosure Disclaimer')</a></li>
+                            <li class="footer-menu__item"><a href="{{ route('policy.pages', 'delivery-policy') }}" class="footer-menu__link">@lang('Delivery Policy')</a></li>
+                            <li class="footer-menu__item"><a href="{{ route('policy.pages', 'compliance-policy') }}" class="footer-menu__link">@lang('Compliance Policy')</a></li>
                         </ul>
                     </div>
                 </div>
@@ -85,10 +94,24 @@
                                 </div>
                                 <div class="footer-contact-menu__item-content">
                                     <a class="footer-contact__desc" href="mailto:support@travelsim.live">support@travelsim.live</a>
-
                                 </div>
                             </li>
-                            
+                            <li class="footer-contact-menu__item">
+                                <div class="footer-contact-menu__item-icon footer-contact-menu__item-shape">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <div class="footer-contact-menu__item-content">
+                                    <a class="footer-contact__desc" href="tel:+447423232975">+44 7423 232975</a>
+                                </div>
+                            </li>
+                            <li class="footer-contact-menu__item">
+                                <div class="footer-contact-menu__item-icon">
+                                    <i class="far fa-clock"></i>
+                                </div>
+                                <div class="footer-contact-menu__item-content">
+                                    <p class="footer-contact__desc">@lang('Mon–Fri 9:00–18:00 GMT')<br>@lang('Sat 10:00–16:00 GMT')</p>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -103,32 +126,26 @@
             <div class="row gy-3">
                 <div class="col-md-12 text-center">
                     <div class="bottom-footer-text text-white"> &copy; {{ date('Y') }} <a href="{{ route('home') }}" class="link">{{ __(gs('site_name')) }}</a>.
-                        @lang('All Rights Reserved')</div>
+                        @lang('All Rights Reserved. BROOKBURN INTERNATIONAL LTD, 35 Firs Avenue, London, England, N11 3NE. Company Registration Number: 14153895 ')</div>
                 </div>
             </div>
         </div>
     </div>
 
-<div style="display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem;" class="footer-area__footer-top">
+<div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 1rem; padding: 1rem;" class="footer-area__footer-top">
 
     <span role="img" aria-label="Visa" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa Logo" style="height: 30px; width: auto;">
+        <img src="https://download.logo.wine/logo/Visa_Inc./Visa_Inc.-Logo.wine.png" alt="Visa" style="height: 30px; width: auto;" loading="lazy">
     </span>
 
     <span role="img" aria-label="Mastercard" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard Logo" style="height: 30px; width: auto;">
     </span>
 
-    <span role="img" aria-label="American Express" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_(2018).svg" alt="Amex Logo" style="height: 30px; width: auto;">
-    </span>
+   
 
-    <span role="img" aria-label="PayPal" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal Logo" style="height: 30px; width: auto;">
-    </span>
-
-    <span role="img" aria-label="Stripe" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo,_revised_2016.svg" alt="Stripe Logo" style="height: 30px; width: auto;">
+    <span role="img" aria-label="3D Secure" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
+        <img src="{{ asset('assets/images/logo_icon/3ds_visa_master.jpg') }}" alt="3D Secure" style="height: 30px; width: auto;">
     </span>
 
 </div>

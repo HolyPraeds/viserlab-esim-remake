@@ -7,6 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class GatewayCurrency extends Model
 {
+    protected $fillable = [
+        'name',
+        'currency',
+        'symbol',
+        'method_code',
+        'gateway_alias',
+        'min_amount',
+        'max_amount',
+        'percent_charge',
+        'fixed_charge',
+        'rate',
+        'gateway_parameter',
+    ];
 
     protected $hidden = [
         'gateway_parameter'

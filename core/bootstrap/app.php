@@ -73,7 +73,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->validateCsrfTokens(
-            except: ['user/deposit','ipn*']
+            // webhooks/* = AlpPay POST /webhooks/alppay (must not 419 — webhook/* alone does not match "webhooks")
+            except: ['user/deposit', 'ipn*', 'webhooks/*', 'webhook/*']
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {

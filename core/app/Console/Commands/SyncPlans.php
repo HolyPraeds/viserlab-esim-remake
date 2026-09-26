@@ -18,6 +18,7 @@ class SyncPlans extends Command
             return 1;
         }
         $dataPlan->addOrUpdatePlans($plans);
+        $this->call('plans:deactivate-zero-price');
         $this->info('Plans synced successfully.');
         return 0;
     }

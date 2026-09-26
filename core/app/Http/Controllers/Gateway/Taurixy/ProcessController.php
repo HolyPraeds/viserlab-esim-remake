@@ -21,7 +21,7 @@ class ProcessController extends Controller
         // Подготавливаем данные для платежа
         $paymentData = [
             'amount' => $deposit->final_amount,
-            'currency' => $deposit->method_currency ?? 'USD',
+            'currency' => $deposit->method_currency ?? 'EUR',
             'reference_id' => $deposit->trx,
             'description' => 'eSIM Purchase - Order #' . $deposit->trx,
             'payment_method' => 'BASIC_CARD',

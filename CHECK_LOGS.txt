@@ -1,0 +1,108 @@
+═══════════════════════════════════════════════════════════════
+  КАК ПРОВЕРИТЬ ЛОГИ И НАЙТИ ПРОБЛЕМУ
+═══════════════════════════════════════════════════════════════
+
+📋 ГДЕ НАХОДЯТСЯ ЛОГИ:
+───────────────────────────────────────────────────────────────
+   Путь: core/storage/logs/laravel.log
+   
+   Или если используется daily логирование:
+   core/storage/logs/laravel-YYYY-MM-DD.log
+
+🔍 КОМАНДЫ ДЛЯ ПРОВЕРКИ ЛОГОВ:
+───────────────────────────────────────────────────────────────
+
+1. Посмотреть последние ошибки:
+   tail -n 100 core/storage/logs/laravel.log
+
+2. Искать ошибки по ключевому слову:
+   grep -i "currency\|api.currency.rates\|route" core/storage/logs/laravel.log
+
+3. Посмотреть последние 50 строк в реальном времени:
+   tail -f core/storage/logs/laravel.log
+
+4. Проверить конкретную ошибку:
+   grep -A 20 "Route.*not defined" core/storage/logs/laravel.log
+
+═══════════════════════════════════════════════════════════════
+  ДИАГНОСТИКА ПРОБЛЕМЫ:
+═══════════════════════════════════════════════════════════════
+
+1️⃣ ПРОВЕРИТЬ МАРШРУТ:
+───────────────────────────────────────────────────────────────
+   Выполнить в папке core/:
+   
+   php artisan route:list | grep currency
+   
+   Должна быть строка:
+   GET|HEAD  api/currency/rates ... ApiController@currencyRates
+
+2️⃣ ПРОВЕРИТЬ ФАЙЛЫ:
+───────────────────────────────────────────────────────────────
+   - routes/api.php должен содержать:
+     Route::get('/currency/rates', [ApiController::class, 'currencyRates'])
+         ->name('api.currency.rates');
+   
+   - app/Http/Controllers/ApiController.php должен содержать метод:
+     public function currencyRates()
+
+3️⃣ ЗАПУСТИТЬ ДИАГНОСТИЧЕСКИЙ СКРИПТ:
+───────────────────────────────────────────────────────────────
+   cd core
+   php check_currency_api.php
+   
+   Скрипт проверит:
+   - Наличие валют в БД
+   - Работу маршрута
+   - Работу API endpoint
+
+4️⃣ ОЧИСТИТЬ КЭШИ:
+───────────────────────────────────────────────────────────────
+   cd core
+   php artisan route:clear
+   php artisan config:clear
+   php artisan cache:clear
+   php artisan view:clear
+
+5️⃣ ПРОВЕРИТЬ В БРАУЗЕРЕ:
+───────────────────────────────────────────────────────────────
+   Открыть в браузере:
+   https://your-domain.com/api/currency/rates
+   
+   Должен вернуться JSON:
+   {
+     "status": "success",
+     "base_currency": "EUR",
+     "rates": {
+       "GBP": {"code": "GBP", "rate": 0.87}
+     }
+   }
+
+═══════════════════════════════════════════════════════════════
+  ЧАСТЫЕ ПРОБЛЕМЫ И РЕШЕНИЯ:
+═══════════════════════════════════════════════════════════════
+
+❌ Route [api.currency.rates] not defined
+   → Файл routes/api.php не обновлён на проде
+   → Выполнить: php artisan route:clear
+
+❌ Method currencyRates does not exist
+   → Файл ApiController.php не обновлён
+   → Проверить наличие метода в контроллере
+
+❌ Empty response from API
+   → В таблице currencies нет записей для EUR/GBP
+   → Добавить валюты через админку или напрямую в БД
+
+❌ 404 Not Found при обращении к /api/currency/rates
+   → Проблема с маршрутизацией API
+   → Проверить RouteServiceProvider
+
+═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+

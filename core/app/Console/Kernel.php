@@ -9,7 +9,8 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // After any manual/cron sync, keep zero / near-zero customer prices off the storefront.
+        $schedule->command('plans:deactivate-zero-price')->daily();
     }
 
     protected function commands()

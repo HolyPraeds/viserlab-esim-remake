@@ -28,7 +28,7 @@
                                     <h5 class="esim-plan-card__title">
                                         {{ __($country['name']) }}
                                     </h5>
-                                    <span class="esim-plan-card__price">
+                                    <span class="esim-plan-card__price" data-base-amount="{{ $country['converted_price'] }}" data-base-currency="EUR">
                                         @lang('From') {{ showAmount($country['converted_price']) }}
                                     </span>
                                 </div>

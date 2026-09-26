@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Page Design</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        /* Policy Section */
+        .policy-section {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .policy-container {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .policy-content {
+            padding: 3rem 2.5rem;
+            color: #1e293b;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        /* Header Styles */
+        .policy-content h3 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #007bff;
+            position: relative;
+        }
+
+        .policy-content h3::before {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+        }
+
+        /* Company Info Header */
+        .policy-content .company-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .policy-content .company-header p {
+            margin: 0.5rem 0;
+            font-size: 15px;
+            opacity: 0.95;
+        }
+
+        .policy-content .company-header .company-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section Headings */
+        .policy-content h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+
+        .policy-content h4:first-of-type {
+            margin-top: 0;
+        }
+
+        /* Paragraphs */
+        .policy-content p {
+            margin: 1rem 0;
+            color: #475569;
+            text-align: justify;
+        }
+
+        .policy-content p.lead {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 17px;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Lists */
+        .policy-content ul,
+        .policy-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+            color: #475569;
+        }
+
+        .policy-content li {
+            margin: 0.75rem 0;
+            line-height: 1.7;
+        }
+
+        .policy-content ul li::marker {
+            color: #007bff;
+        }
+
+        /* Sub-sections */
+        .policy-content h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Highlighted Sections */
+        .policy-content .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #007bff;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+
+        .policy-content .warning-box {
+            background: #fff7ed;
+            border-left: 4px solid #f59e0b;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .policy-content .info-box {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        /* Contact Section */
+        .policy-content .contact-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2.5rem;
+            border: 2px solid #e2e8f0;
+        }
+
+        .policy-content .contact-section h4 {
+            margin-top: 0;
+            color: #0f172a;
+        }
+
+        /* Link Styles */
+        .policy-content a {
+            color: #007bff;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .policy-content a:hover {
+            color: #0056b3;
+            border-bottom-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .policy-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .policy-content h3 {
+                font-size: 1.75rem;
+            }
+
+            .policy-content h4 {
+                font-size: 1.3rem;
+            }
+
+            .policy-content {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .policy-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .policy-content h3 {
+                font-size: 1.5rem;
+            }
+
+            .policy-content h4 {
+                font-size: 1.15rem;
+                padding-left: 0.75rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            .policy-container {
+                box-shadow: none;
+                border: 1px solid #e5e7eb;
+            }
+
+            .policy-content h3,
+            .policy-content h4 {
+                page-break-after: avoid;
+            }
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <section class="policy-section">
+        <div class="container">
+            <div class="policy-container">
+                <div class="policy-content">
+                    <!-- Заголовок политики -->
+                    <h3>Privacy Policy</h3>
+
+                    <!-- Блок информации о компании -->
+                    <div class="company-header">
+                        <p class="company-name">BROOKBURN INTERNATIONAL LTD</p>
+                        <p>Company Registration Number: 14153895</p>
+                        <p>Registered Address: 35 Firs Avenue, London, England, N11 3NE</p>
+                        <p>Last Updated: September 10, 2025</p>
+                    </div>
+
+                    <!-- Вводный текст -->
+                    <p>At BROOKBURN INTERNATIONAL LTD ("we," "us," "our," or "the Company"), we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and protect your personal data when you use our website travelsim.live, mobile applications, or other services (collectively, the "Platform") to purchase or manage electronic SIM cards ("eSIMs") and related services (collectively, the "Services").</p>
+
+                    <!-- Секция 1 -->
+                    <h4>1. Scope of This Privacy Policy</h4>
+                    <p>This Privacy Policy applies to all personal data collected through our Platform, whether you are browsing our website, purchasing an eSIM, or contacting our customer support team. It covers data collected online and, where applicable, offline interactions related to our Services.</p>
+
+                    <!-- Секция 2 -->
+                    <h4>2. Information We Collect</h4>
+                    <p>We collect various types of information to provide and improve our Services. This includes:</p>
+
+                    <!-- Подсекция 2.1 -->
+                    <h5>2.1 Personal Information</h5>
+                    <p>Personal information is data that can identify you, either directly or indirectly. We may collect:</p>
+                    <ul>
+                        <li><strong>Contact Information:</strong> Your name, email address, phone number, and billing address provided during account registration or purchase.</li>
+                        <li><strong>Payment Information:</strong> Credit/debit card details, payment method details, or other financial information processed through secure third-party payment providers.</li>
+                        <li><strong>Account Information:</strong> Username, password, and other credentials used to access your account on our Platform.</li>
+                    </ul>
+
+                    <!-- Подсекция 2.2 -->
+                    <h5>2.2 Non-Personal Information</h5>
+                    <p>We may collect non-identifying information, including:</p>
+                    <ul>
+                        <li>Device Information: Details about your device, such as its model, operating system, browser type, IP address, and eSIM compatibility status.</li>
+                        <li>Usage Data: Information about how you interact with our Platform, such as pages visited, time spent, and eSIM activation details.</li>
+                        <li>Cookies and Tracking Technologies: Data collected through cookies, web beacons, or similar technologies to enhance user experience and analyze Platform performance.</li>
+                    </ul>
+
+                    <!-- Важный блок информации -->
+                    <div class="highlight-box">
+                        <p><strong>Important:</strong> By using our Platform or Services, you consent to the practices described in this Privacy Policy. If you do not agree with this policy, please do not use our Platform or Services.</p>
+                    </div>
+
+                    <!-- Секция 3 -->
+                    <h4>3. How We Use Your Information</h4>
+                    <p>We use your personal data for the following purposes:</p>
+                    <ol>
+                        <li><strong>Service Delivery:</strong> To process your eSIM purchases, activate eSIMs, and provide connectivity through third-party mobile network operators.</li>
+                        <li><strong>Account Management:</strong> To create, maintain, and secure your account on our Platform.</li>
+                        <li><strong>Customer Support:</strong> To respond to your inquiries, troubleshoot issues, and provide technical assistance.</li>
+                        <li><strong>Payment Processing:</strong> To process transactions securely through third-party payment providers.</li>
+                    </ol>
+
+                    <!-- Предупреждение -->
+                    <div class="warning-box">
+                        <p><strong>Warning:</strong> We do not sell your personal data to third parties for marketing or other purposes.</p>
+                    </div>
+
+                    <!-- Информационный блок -->
+                    <div class="info-box">
+                        <p><strong>Note:</strong> You can manage cookie preferences through your browser settings or our Platform's cookie consent tool. Disabling cookies may affect the functionality of certain features.</p>
+                    </div>
+
+                    <!-- Секция контактов -->
+                    <div class="contact-section">
+                        <h4>Contact Us</h4>
+                        <p>If you have questions, concerns, or complaints about this Privacy Policy or our data practices, please contact us at:</p>
+                        <p>
+                            <strong>BROOKBURN INTERNATIONAL LTD</strong><br>
+                            35 Firs Avenue, London, England, N11 3NE<br>
+                            Email: <a href="mailto:support@travelsim.live">support@travelsim.live</a><br>
+                            Phone: Available on our website travelsim.live for customer support inquiries.
+                        </p>
+                        <p>We aim to respond to all inquiries within 48 hours.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

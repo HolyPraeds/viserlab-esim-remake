@@ -64,19 +64,12 @@
                         <div class="col-md-12">
                             <x-captcha />
                             @if (gs('agree'))
-                                @php
-                                    $policyPages = getContent('policy_pages.element', false, orderById: true);
-                                @endphp
                                 <div class="form--check">
                                     <input class="form-check-input" type="checkbox" id="flexCheckChecked" @checked(old('agree')) name="agree" required>
                                     <label class="form-check-label" for="flexCheckChecked">
-                                        @lang('I am agree with all ')
-                                        @foreach ($policyPages as $policy)
-                                            <a href="{{ route('policy.pages', $policy->slug) }}" target="_blank" class="text--base">{{ __($policy->data_values->title) }}</a>
-                                            @if (!$loop->last)
-                                                ,
-                                            @endif
-                                        @endforeach
+                                        @lang('I agree with all ')
+                                        <a href="{{ route('policy.pages', 'terms-and-conditions') }}" target="_blank" class="text--base">@lang('Terms and Conditions')</a>,
+                                        <a href="{{ route('policy.pages', 'privacy-policy') }}" target="_blank" class="text--base">@lang('Privacy Policy')</a>
                                     </label>
                                 </div>
                             @endif

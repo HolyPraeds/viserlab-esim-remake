@@ -76,8 +76,28 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        if (gs('force_ssl')) {
-            \URL::forceScheme('https');
+        try {
+            if (gs('force_ssl')) {
+                \URL::forceScheme('https');
+            }
+        } catch (\Throwable $e) {
+            // If DB is misconfigured, boot must not abort before routes load (otherwise error pages break).
+            \Log::warning('AppServiceProvider: could not read general_settings for force_ssl', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // When behind ngrok or reverse proxy: use request URL for asset() so CSS/JS load correctly
+        if (!app()->runningInConsole()) {
+            $fwdProto = request()->header('X-Forwarded-Proto');
+            $host = request()->header('X-Forwarded-Host') ?: request()->getHttpHost();
+            $isProxy = $fwdProto === 'https' || str_contains((string) $host, 'ngrok');
+            if ($isProxy) {
+                $base = rtrim((string) request()->getBasePath(), '/');
+                $root = 'https://' . $host . ($base ?: '');
+                \URL::forceScheme('https');
+                \URL::forceRootUrl(rtrim($root, '/'));
+            }
         }
 
         // Fix for CLI mode URI backslash issue on Windows

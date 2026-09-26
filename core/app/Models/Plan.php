@@ -31,18 +31,31 @@ class Plan extends Model {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * Plans with a positive customer-facing price (after retail_price ÷ divisor).
+     */
+    public function scopeWithPositivePrice($query)
+    {
+        $divisor = max(1.0, (float) config('plans.customer_price_divisor', 4));
+        $minRetail = 0.005 * $divisor;
+
+        return $query->where('retail_price', '>=', $minRetail);
+    }
+
     public function convertedPrice(): Attribute {
         return Attribute::make(
             get: function () {
+                $customerPrice = planCustomerPrice($this);
+
                 if ($this->price_currency == gs('cur_text')) {
-                    return $this->retail_price;
+                    return $customerPrice;
                 }
 
                 if ($this->currency && $this->currency->conversion_rate > 0) {
-                    return $this->retail_price / $this->currency->conversion_rate;
+                    return $customerPrice / $this->currency->conversion_rate;
                 }
 
-                return $this->retail_price;
+                return $customerPrice;
             }
         );
     }

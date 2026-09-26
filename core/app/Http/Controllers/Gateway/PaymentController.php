@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller {
     public function deposit() {
@@ -113,59 +114,229 @@ class PaymentController extends Controller {
     }
 
     public static function userDataUpdate($deposit, $isManual = null) {
-        if ($deposit->status == Status::PAYMENT_INITIATE || $deposit->status == Status::PAYMENT_PENDING) {
+        $lookupTrx = $deposit->trx ?? null;
+        $lookupGatewayTrx = $deposit->gateway_trx ?? null;
+
+        $deposit = Deposit::query()
+            ->when($lookupTrx, function ($q) use ($lookupTrx) {
+                $q->where('trx', $lookupTrx);
+            }, function ($q) use ($deposit, $lookupGatewayTrx) {
+                // Fallback for legacy/broken rows where id can be 0.
+                if ($lookupGatewayTrx) {
+                    $q->where('gateway_trx', $lookupGatewayTrx);
+                } else {
+                    $q->whereKey($deposit->id);
+                }
+            })
+            ->first();
+        if (!$deposit) {
+            return;
+        }
+        if ((int) ($deposit->id ?? 0) === 0) {
+            \Log::warning('userDataUpdate: deposit id is 0 (fallback lookup by trx used)', [
+                'trx' => $deposit->trx,
+                'gateway_trx' => $deposit->gateway_trx,
+            ]);
+        }
+
+        $status = (int) $deposit->status;
+        if ($status !== Status::PAYMENT_INITIATE && $status !== Status::PAYMENT_PENDING) {
+            \Log::info('userDataUpdate: skip (deposit not pending)', [
+                'trx' => $deposit->trx,
+                'status' => $deposit->status,
+                'status_int' => $status,
+                'order_id' => $deposit->order_id,
+            ]);
+            return;
+        }
+
+        // --- Order card payment: mark paid then fulfill order (no wallet credit).
+        // Use integer check: order_id can be string from DB; "0" must stay wallet, not order.
+        if ((int) $deposit->order_id !== 0) {
             $deposit->status = Status::PAYMENT_SUCCESS;
             $deposit->save();
 
             $user = User::find($deposit->user_id);
-            $user->balance += $deposit->amount;
-            $user->save();
-
             $methodName = $deposit->methodName();
+            $title = 'Payment successful via ' . $methodName;
 
-            if ($deposit->order_id) {
-                $detail = 'Payment Via ' . $methodName;
-                $remark = 'payment';
-                $title = 'Payment successful via ' . $methodName;
-            } else {
-                $detail = 'Deposit by Card';
-                $remark = 'deposit';
-                $title = 'Deposit successful via ' . $methodName;
+            try {
+                if (!$isManual && $user) {
+                    $adminNotification = new AdminNotification();
+                    $adminNotification->user_id = $user->id;
+                    $adminNotification->title = $title;
+                    $adminNotification->click_url = urlPath('admin.deposit.successful');
+                    $adminNotification->save();
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('userDataUpdate: admin notification failed (order payment)', [
+                    'deposit_trx' => $deposit->trx,
+                    'error' => $e->getMessage(),
+                ]);
             }
 
-            $transaction               = new Transaction();
-            $transaction->user_id      = $deposit->user_id;
-            $transaction->amount       = $deposit->amount;
-            $transaction->post_balance = $user->balance;
-            $transaction->charge       = $deposit->charge;
-            $transaction->trx_type     = '+';
-            $transaction->details      = $detail;
-            $transaction->trx          = $deposit->trx;
-            $transaction->remark       = $remark;
-            $transaction->save();
+            $order = Order::with('user', 'orderItem.plan')->find($deposit->order_id);
+            if ($order) {
+                try {
+                    dataPlans()->confirmPurchase($order);
+                } catch (\Throwable $e) {
+                    \Log::error('userDataUpdate: confirmPurchase failed', [
+                        'order_id' => $order->id,
+                        'deposit_trx' => $deposit->trx,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+            return;
+        }
 
-            notify($user, $isManual ? 'DEPOSIT_APPROVE' : 'DEPOSIT_COMPLETE', [
-                'method_name'     => $methodName,
-                'method_currency' => $deposit->method_currency,
-                'method_amount'   => showAmount($deposit->final_amount, currencyFormat: false),
-                'amount'          => showAmount($deposit->amount, currencyFormat: false),
-                'charge'          => showAmount($deposit->charge, currencyFormat: false),
-                'rate'            => showAmount($deposit->rate, currencyFormat: false),
-                'trx'             => $deposit->trx,
-                'post_balance'    => showAmount($user->balance),
+        // --- Wallet deposit: credit balance and SUCCESS in one DB transaction (avoid SUCCESS without balance).
+        $walletCredited = false;
+        try {
+            DB::transaction(function () use ($deposit, &$walletCredited, $lookupTrx, $lookupGatewayTrx) {
+                $d = Deposit::query()
+                    ->lockForUpdate()
+                    ->when($lookupTrx, function ($q) use ($lookupTrx) {
+                        $q->where('trx', $lookupTrx);
+                    }, function ($q) use ($deposit, $lookupGatewayTrx) {
+                        if ($lookupGatewayTrx) {
+                            $q->where('gateway_trx', $lookupGatewayTrx);
+                        } else {
+                            $q->whereKey($deposit->id);
+                        }
+                    })
+                    ->first();
+                if (!$d) {
+                    return;
+                }
+                $ds = (int) $d->status;
+                if ($ds !== Status::PAYMENT_INITIATE && $ds !== Status::PAYMENT_PENDING) {
+                    return;
+                }
+
+                $user = User::lockForUpdate()->find($d->user_id);
+                if (!$user) {
+                    \Log::error('userDataUpdate: no user for deposit', ['deposit_trx' => $d->trx]);
+                    throw new \RuntimeException('user not found for deposit');
+                }
+
+                $amountToAdd = (float) $d->amount;
+                $paymentCurrency = $d->method_currency ?? 'EUR';
+                if ($paymentCurrency !== 'EUR') {
+                    $exchangeRates = [
+                        'GBP' => 0.87,
+                        'USD' => 1.18,
+                    ];
+                    if (isset($exchangeRates[$paymentCurrency])) {
+                        $amountToAdd = (float) $d->amount / $exchangeRates[$paymentCurrency];
+                    }
+                }
+
+                $user->balance += $amountToAdd;
+                $user->save();
+
+                $transaction = new Transaction();
+                $transaction->user_id = $d->user_id;
+                $transaction->order_id = 0; // schema requires order_id (wallet / top-up is not tied to an order)
+                $transaction->amount = $amountToAdd;
+                $transaction->post_balance = $user->balance;
+                $transaction->charge = $d->charge;
+                $transaction->trx_type = '+';
+                $transaction->details = 'Deposit by Card';
+                $transaction->trx = $d->trx;
+                $transaction->remark = 'deposit';
+                $transaction->save();
+
+                $d->status = Status::PAYMENT_SUCCESS;
+                $d->save();
+                $walletCredited = true;
+                \Log::info('userDataUpdate: wallet deposit credited', [
+                    'user_id' => $user->id,
+                    'deposit_trx' => $d->trx,
+                    'amount_credits' => $amountToAdd,
+                    'post_balance' => $user->balance,
+                ]);
+            });
+        } catch (\Throwable $e) {
+            \Log::error('userDataUpdate: wallet deposit transaction failed', [
+                'deposit_trx' => $deposit->trx,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
+            return;
+        }
 
-            if (!$isManual) {
-                $adminNotification            = new AdminNotification();
-                $adminNotification->user_id   = $user->id;
-                $adminNotification->title     = $title;
+        if (!$walletCredited) {
+            return;
+        }
+
+        $deposit = Deposit::query()
+            ->when($lookupTrx, function ($q) use ($lookupTrx) {
+                $q->where('trx', $lookupTrx);
+            }, function ($q) use ($lookupGatewayTrx, $deposit) {
+                if ($lookupGatewayTrx) {
+                    $q->where('gateway_trx', $lookupGatewayTrx);
+                } else {
+                    $q->whereKey($deposit->id);
+                }
+            })
+            ->first();
+        $user = User::find($deposit->user_id);
+        if (!$deposit || !$user) {
+            return;
+        }
+
+        $methodName = $deposit->methodName();
+        $title = 'Deposit successful via ' . $methodName;
+        $creditsRateLine = '1.00 Credits = 1.00 EUR = 0.87 GBP = 1.18 USD';
+
+        $creditsAdded = (float) $deposit->amount;
+        $payCur = $deposit->method_currency ?? 'EUR';
+        if ($payCur !== 'EUR') {
+            $exchangeRates = ['GBP' => 0.87, 'USD' => 1.18];
+            if (isset($exchangeRates[$payCur])) {
+                $creditsAdded = (float) $deposit->amount / $exchangeRates[$payCur];
+            }
+        }
+
+        try {
+            notify($user, $isManual ? 'DEPOSIT_APPROVE' : 'DEPOSIT_COMPLETE', [
+                'fullname' => $user->fullname ?? $user->username ?? 'Customer',
+                'method_name' => $methodName,
+                'method_currency' => $deposit->method_currency,
+                'method_amount' => showAmount($deposit->final_amount, currencyFormat: false),
+                'amount' => showAmount($deposit->amount, currencyFormat: false),
+                'charge' => showAmount($deposit->charge, currencyFormat: false),
+                'rate' => showAmount($deposit->rate, currencyFormat: false),
+                'trx' => $deposit->trx,
+                'post_balance' => showAmount($user->balance),
+                'paid_via' => 'Bank card',
+                'deposit_amount' => showAmount($deposit->amount, currencyFormat: false),
+                'deposit_currency' => $deposit->method_currency,
+                'credits_added' => showAmount($creditsAdded, currencyFormat: false),
+                'credits_currency' => 'Credits',
+                'credits_rate_line' => $creditsRateLine,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('userDataUpdate: notify DEPOSIT_COMPLETE failed (deposit still credited)', [
+                'deposit_trx' => $deposit->trx,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        if (!$isManual) {
+            try {
+                $adminNotification = new AdminNotification();
+                $adminNotification->user_id = $user->id;
+                $adminNotification->title = $title;
                 $adminNotification->click_url = urlPath('admin.deposit.successful');
                 $adminNotification->save();
-            }
-
-            if ($deposit->order_id) {
-                $order = Order::with('user', 'orderItem.plan')->find($deposit->order_id);
-                dataPlans()->confirmPurchase($order);
+            } catch (\Throwable $e) {
+                \Log::warning('userDataUpdate: admin notification failed (deposit)', [
+                    'deposit_trx' => $deposit->trx,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
     }

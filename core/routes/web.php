@@ -13,12 +13,14 @@ Route::controller('User\PlanController')->prefix('user/plan')->name('user.plan.'
     Route::match(['GET', 'POST'], 'purchase', 'purchase')->name('purchase');
 });
 Route::controller('User\OrderController')->prefix('user/order')->name('user.order.')->group(function () {
+    Route::get('payment/return/{id?}/{referenceId?}/{state?}/{type?}', 'paymentReturn')->name('payment.return')->where(['state' => '.*']);
     Route::get('payment/success', 'paymentSuccess')->name('payment.success');
     Route::get('payment/{id}', 'payment')->name('payment');
     Route::post('payment/initiate', 'paymentInitiate')->name('payment.initiate');
     Route::post('payment/taurixy-direct', 'taurixyDirect')->name('payment.taurixy.direct');
     Route::get('pending', 'pending')->name('pending');
     Route::get('completed', 'completed')->name('completed');
+    Route::match(['GET', 'POST'], 'track', 'track')->name('track');
 });
 
 // User Support Ticket
@@ -64,9 +66,16 @@ Route::controller('SiteController')->group(function () {
     Route::get('/', 'index')->name('home');
 });
 
-// Alp-Pay routes
-Route::controller(\App\Http\Controllers\Gateway\AlpPayController::class)->prefix('user/deposit/alppay')->name('user.deposit.alppay.')->group(function () {
-    Route::post('create', 'create')->name('create');
+// Alp-Pay user deposit routes (must stay behind auth — was previously duplicated in routes/user.php)
+Route::middleware(['auth', 'check.status', 'registration.complete'])->controller(\App\Http\Controllers\Gateway\AlpPayController::class)->prefix('user/deposit/alppay')->name('user.deposit.alppay.')->group(function () {
+    // Allow direct redirect from deposit form without intermediate Payment Preview page
+    Route::match(['GET','POST'], 'create', 'create')->name('create');
+    // H2H flow: form first, then create with card
+    Route::get('h2h', 'createH2H')->name('h2h.create');
+    Route::post('h2h/card', 'createH2HWithCard')->name('h2h.createWithCard');
+    Route::get('h2h/process', 'processH2H')->name('h2h.process');
+    Route::post('h2h/submit', 'submitH2H')->name('h2h.submit');
+    Route::get('h2h/check', 'checkH2H')->name('h2h.check');
 });
 
 // Alp-Pay webhook

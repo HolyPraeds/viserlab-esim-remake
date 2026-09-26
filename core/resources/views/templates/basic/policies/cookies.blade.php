@@ -72,7 +72,7 @@ Your IP address, browser type, and device information.
 Pages visited, links clicked, and time spent on our Platform.
 Preferences, such as language or currency settings.
 Anonymized usage statistics for analytics purposes.
-This data is processed in accordance with our Privacy Policy, available on our Platform, and is subject to the data protection measures outlined therein.
+This data is processed in accordance with our <a href="{{ route('policy.pages', 'privacy-policy') }}" target="_blank">Privacy Policy</a>, available on our Platform, and is subject to the data protection measures outlined therein.
 8. Data Security
 We implement appropriate technical and organizational measures to protect data collected through cookies, including:
 Encrypting sensitive data during transmission.

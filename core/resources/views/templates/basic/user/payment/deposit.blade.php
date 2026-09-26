@@ -6,23 +6,27 @@
                 <div class="col-md-8">
                     <form action="{{ route('user.deposit.insert') }}" method="post" class="deposit-form">
                         @csrf
-                        <input type="hidden" name="currency" value="EUR">
+                        <input type="hidden" name="currency" id="selected_currency" value="EUR">
                         <div class="row justify-content-center gy-sm-4 gy-3">
                             <div class="col-lg-6">
                                 <div class="payment-system-list gateway-option-list">
-                                    @php $data = $gatewayCurrency->first(); @endphp
-                                    @if($data)
-                                        <label for="deposit_by_card" class="payment-item gateway-option">
+                                    @foreach($gatewayCurrencies as $gc)
+                                        @php
+                                            $inputId = 'deposit_by_card_' . strtolower($gc->currency);
+                                        @endphp
+                                        <label for="{{ $inputId }}" class="payment-item gateway-option" data-currency="{{ $gc->currency }}" data-gateway='@json($gc)'>
                                             <div class="payment-item__info">
                                                 <span class="payment-item__check"></span>
-                                                <span class="payment-item__name">@lang('Deposit by Card')</span>
+                                                <span class="payment-item__name">@lang('Deposit by Card') {{ $gc->currency }}</span>
                                             </div>
                                             <div class="payment-item__thumb">
-                                                <img class="payment-item__thumb-img" src="{{ getImage(getFilePath('gateway') . '/' . $data->method->image) }}" alt="@lang('payment-thumb')">
+                                                <div class="payment-item__thumb-img" style="display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                                                    💳
+                                                </div>
                                             </div>
-                                            <input class="payment-item__radio gateway-input" id="deposit_by_card" hidden data-gateway='@php echo json_encode($data) @endphp' type="radio" name="gateway" value="{{ $data->method_code }}" @checked(true) data-min-amount="{{ showAmount($data->min_amount) }}" data-max-amount="{{ showAmount($data->max_amount) }}">
+                                            <input class="payment-item__radio gateway-input" id="{{ $inputId }}" hidden type="radio" name="gateway" value="{{ $gc->method_code }}" data-currency="{{ $gc->currency }}" @checked($loop->first)>
                                         </label>
-                                    @endif
+                                    @endforeach
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -33,7 +37,7 @@
                                         </div>
                                         <div class="deposit-info__input">
                                             <div class="deposit-info__input-group input-group">
-                                                <span class="deposit-info__input-group-text">{{ gs('cur_sym') }}</span>
+                                                <span class="deposit-info__input-group-text currency-symbol">€</span>
                                                 <input type="text" class="form-control form--control amount" name="amount" placeholder="@lang('00.00')" value="{{ old('amount') }}" autocomplete="off">
                                             </div>
                                         </div>
@@ -58,7 +62,7 @@
                                         </div>
                                         <div class="deposit-info__input">
                                             <p class="text"><span class="processing-fee">@lang('0.00')</span>
-                                                {{ __(gs('cur_text')) }}
+                                                <span class="currency-text">EUR</span>
                                             </p>
                                         </div>
                                     </div>
@@ -69,7 +73,7 @@
                                         </div>
                                         <div class="deposit-info__input">
                                             <p class="text"><span class="final-amount">@lang('0.00')</span>
-                                                {{ __(gs('cur_text')) }}</p>
+                                                <span class="currency-text">EUR</span></p>
                                         </div>
                                     </div>
 
@@ -99,92 +103,88 @@
     <script>
         "use strict";
         (function($) {
-
+            // Currency data from backend
+            var gatewayCurrencies = @json($gatewayCurrencies->keyBy('currency'));
+            
             var amount = parseFloat($('.amount').val() || 0);
-            var gateway, minAmount, maxAmount;
+            var currentCurrency = 'EUR';
+            var currentGateway = null;
+            
+            // Currency symbols mapping
+            var currencySymbols = {
+                'EUR': '€',
+                'GBP': '£',
+                'USD': '$'
+            };
 
+            // Handle gateway/currency selection
+            $('.gateway-input').on('change', function() {
+                var currency = $(this).data('currency');
+                selectCurrency(currency);
+            });
 
-            $('.amount').on('input', function(e) {
-                amount = parseFloat($(this).val());
-                if (!amount) {
-                    amount = 0;
+            function selectCurrency(currency) {
+                currentCurrency = currency;
+                currentGateway = gatewayCurrencies[currency];
+                
+                if (!currentGateway) {
+                    console.error('Gateway currency not found for:', currency);
+                    return;
                 }
-                calculation();
-            });
-
-            $('.gateway-input').on('change', function(e) {
-                gatewayChange();
-            });
-
-            function gatewayChange() {
-                let gatewayElement = $('.gateway-input:checked');
-                let methodCode = gatewayElement.val();
-
-                gateway = gatewayElement.data('gateway');
-                minAmount = gatewayElement.data('min-amount');
-                maxAmount = gatewayElement.data('max-amount');
-
-                let processingFeeInfo =
-                    `${parseFloat(gateway.percent_charge).toFixed(2)}% with ${parseFloat(gateway.fixed_charge).toFixed(2)} {{ __(gs('cur_text')) }} charge for payment gateway processing fees`
-                $(".proccessing-fee-info").attr("data-bs-original-title", processingFeeInfo);
+                
+                // Update UI
+                $('#selected_currency').val(currency);
+                $('.currency-symbol').text(currencySymbols[currency]);
+                $('.currency-text').text(currency);
+                
                 calculation();
             }
 
-            gatewayChange();
-
-            $(".more-gateway-option").on("click", function(e) {
-                let paymentList = $(".gateway-option-list");
-                paymentList.find(".gateway-option").removeClass("d-none");
-                $(this).addClass('d-none');
-                paymentList.animate({
-                    scrollTop: (paymentList.height() - 60)
-                }, 'slow');
+            $('.amount').on('input', function(e) {
+                amount = parseFloat($(this).val()) || 0;
+                calculation();
             });
 
             function calculation() {
-                if (!gateway) return;
-                $(".gateway-limit").text(minAmount + " - " + maxAmount);
+                if (!currentGateway) return;
+                
+                var minAmount = parseFloat(currentGateway.min_amount) || 1;
+                var maxAmount = parseFloat(currentGateway.max_amount) || 2800;
+                
+                $(".gateway-limit").text(minAmount + " - " + maxAmount + " " + currentCurrency);
 
-                let percentCharge = 0;
-                let fixedCharge = 0;
-                let totalPercentCharge = 0;
+                var percentCharge = parseFloat(currentGateway.percent_charge) || 0;
+                var fixedCharge = parseFloat(currentGateway.fixed_charge) || 0;
+                var totalPercentCharge = 0;
 
                 if (amount) {
-                    percentCharge = parseFloat(gateway.percent_charge);
-                    fixedCharge = parseFloat(gateway.fixed_charge);
                     totalPercentCharge = parseFloat(amount / 100 * percentCharge);
                 }
 
-                let totalCharge = parseFloat(totalPercentCharge + fixedCharge);
-                let totalAmount = parseFloat((amount || 0) + totalPercentCharge + fixedCharge);
+                var totalCharge = parseFloat(totalPercentCharge + fixedCharge);
+                var totalAmount = parseFloat((amount || 0) + totalPercentCharge + fixedCharge);
 
                 $(".final-amount").text(totalAmount.toFixed(2));
                 $(".processing-fee").text(totalCharge.toFixed(2));
-                $("input[name=currency]").val('EUR'); // Всегда EUR
-                $(".gateway-currency").text('EUR'); // Всегда EUR
-
-                if (amount < Number(gateway.min_amount) || amount > Number(gateway.max_amount)) {
+                
+                // Validation
+                if (amount < minAmount || amount > maxAmount) {
                     $(".deposit-form button[type=submit]").attr('disabled', true);
                 } else {
                     $(".deposit-form button[type=submit]").removeAttr('disabled');
                 }
+            }
 
-                // Всегда скрываем блоки конвертации - работаем только в EUR
-                $(".gateway-conversion, .conversion-currency").addClass('d-none');
-                $('.deposit-form').removeClass('adjust-height');
-
-                if (gateway.method.crypto == 1) {
-                    $('.crypto-message').removeClass('d-none');
-                } else {
-                    $('.crypto-message').addClass('d-none');
-                }
+            // Initialize on page load - select first currency
+            var firstGateway = $('.gateway-input:checked');
+            if (firstGateway.length) {
+                selectCurrency(firstGateway.data('currency'));
             }
 
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-            $('.gateway-input').change();
+            });
         })(jQuery);
     </script>
 @endpush

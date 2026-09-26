@@ -11,6 +11,9 @@ class Deposit extends Model
 
     protected $casts = [
         'detail' => 'object',
+        // Column was created as boolean() in migration but we store 0–3 (initiate/success/pending/reject)
+        'status' => 'integer',
+        'order_id' => 'integer',
     ];
 
     public function plan()

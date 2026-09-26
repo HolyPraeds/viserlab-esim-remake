@@ -8,6 +8,7 @@ use Mailjet\Resources;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use SendGrid;
+use SendGrid\Mail\Attachment as SendGridAttachment;
 use SendGrid\Mail\Mail;
 
 class Email extends NotifyProcess implements Notifiable{
@@ -99,14 +100,31 @@ class Email extends NotifyProcess implements Notifiable{
         }
         $mail->Port       = $config->port;
         $mail->CharSet = 'UTF-8';
+        // Avoid "certificate verify failed" when server uses self-signed or custom SSL cert
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer'       => false,
+                'verify_peer_name'   => false,
+                'allow_self_signed'  => true,
+            ],
+        ];
         //Recipients
         $mail->setFrom($this->getEmailFrom()['email'], $this->getEmailFrom()['name']);
         $mail->addAddress($this->email, $this->receiverName);
         $mail->addReplyTo($this->getEmailFrom()['email'], $this->getEmailFrom()['name']);
-        // Content
+        // Attachments (e.g. QR code PNG)
+        foreach ($this->emailAttachments ?? [] as $att) {
+            $path = $att['path'] ?? null;
+            $name = $att['name'] ?? basename($path);
+            if ($path && is_readable($path)) {
+                $mail->addAttachment($path, $name);
+            }
+        }
+        // Content: HTML + plain-text alternative (helps avoid spam folder)
         $mail->isHTML(true);
         $mail->Subject = $this->subject;
         $mail->Body    = $this->finalMessage;
+        $mail->AltBody = trim(strip_tags(preg_replace('/<br\s*\/?>/i', "\n", $this->finalMessage)));
         $mail->send();
 	}
 
@@ -116,6 +134,18 @@ class Email extends NotifyProcess implements Notifiable{
 	    $sendgridMail->setSubject($this->subject);
 	    $sendgridMail->addTo($this->email, $this->receiverName);
 	    $sendgridMail->addContent("text/html", $this->finalMessage);
+	    foreach ($this->emailAttachments ?? [] as $att) {
+	        $path = $att['path'] ?? null;
+	        $name = $att['name'] ?? basename($path);
+	        if ($path && is_readable($path)) {
+	            $attachment = new SendGridAttachment();
+	            $attachment->setContent(base64_encode((string) file_get_contents($path)));
+	            $attachment->setType('image/png');
+	            $attachment->setDisposition('attachment');
+	            $attachment->setFilename($name);
+	            $sendgridMail->addAttachment($attachment);
+	        }
+	    }
 	    $sendgrid = new SendGrid(gs('mail_config')->appkey);
 	    $response = $sendgrid->send($sendgridMail);
 	    if($response->statusCode() != 202){
@@ -127,25 +157,37 @@ class Email extends NotifyProcess implements Notifiable{
 	protected function sendMailjetMail()
 	{
 	    $mj = new Client(gs('mail_config')->public_key, gs('mail_config')->secret_key, true, ['version' => 'v3.1']);
-	    $body = [
-	        'Messages' => [
+	    $message = [
+	        'From' => [
+	            'Email' => $this->getEmailFrom()['email'],
+	            'Name' => $this->getEmailFrom()['name'],
+	        ],
+	        'To' => [
 	            [
-	                'From' => [
-	                    'Email' => $this->getEmailFrom()['email'],
-	                    'Name' => $this->getEmailFrom()['name'],
-	                ],
-	                'To' => [
-	                    [
-	                        'Email' => $this->email,
-	                        'Name' => $this->receiverName,
-	                    ]
-	                ],
-	                'Subject' => $this->subject,
-	                'TextPart' => "",
-	                'HTMLPart' => $this->finalMessage,
+	                'Email' => $this->email,
+	                'Name' => $this->receiverName,
 	            ]
-	        ]
+	        ],
+	        'Subject' => $this->subject,
+	        'TextPart' => "",
+	        'HTMLPart' => $this->finalMessage,
 	    ];
+	    $attachments = [];
+	    foreach ($this->emailAttachments ?? [] as $att) {
+	        $path = $att['path'] ?? null;
+	        $name = $att['name'] ?? basename($path);
+	        if ($path && is_readable($path)) {
+	            $attachments[] = [
+	                'ContentType' => 'image/png',
+	                'Filename' => $name,
+	                'Base64Content' => base64_encode((string) file_get_contents($path)),
+	            ];
+	        }
+	    }
+	    if (!empty($attachments)) {
+	        $message['Attachments'] = $attachments;
+	    }
+	    $body = ['Messages' => [$message]];
 	    $response = $mj->post(Resources::$Email, ['body' => $body]);
 	}
 

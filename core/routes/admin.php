@@ -135,6 +135,7 @@ Route::middleware('admin')->group(function () {
         Route::get('pending', 'pending')->name('pending');
         Route::get('completed', 'completed')->name('completed');
         Route::get('detail/{id}', 'detail')->name('detail');
+        Route::post('resend-emails/{orderNumber}', 'resendOrderEmails')->name('resend.emails');
     });
 
     // Deposit Gateway

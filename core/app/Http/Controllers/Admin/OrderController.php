@@ -6,6 +6,7 @@ use App\Constants\Status;
 use App\Http\Controllers\Controller;
 use App\Models\Esim;
 use App\Models\Order;
+use App\Services\OrderEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -39,7 +40,11 @@ class OrderController extends Controller {
             $query->where('user_id', $userId);
         }
 
-        return $query->searchable(['order_number', 'user:username'])->dateFilter()->orderBy('id', 'DESC')->paginate(getPaginate());
+        return $query->with(['user', 'orderItem.plan', 'deposits'])
+            ->searchable(['order_number', 'user:username'])
+            ->dateFilter()
+            ->orderBy('id', 'DESC')
+            ->paginate(getPaginate());
     }
 
     public function esimApprove(Request $request) {
@@ -72,5 +77,43 @@ class OrderController extends Controller {
 
         $notify[] = ['success', 'Selected eSIMs have been updated'];
         return to_route('admin.esim.pending')->withNotify($notify);
+    }
+
+    /**
+     * Resend purchase emails (PAYMENT_COMPLETED with QR, fallback ORDER_PLACED).
+     * Sends to account email + checkout email. Optional extra address can be added.
+     */
+    public function resendOrderEmails(Request $request, string $orderNumber)
+    {
+        $request->validate([
+            'email' => 'nullable|email',
+        ]);
+
+        $order = Order::with('user', 'orderItem.plan', 'deposits')->where('order_number', $orderNumber)->firstOrFail();
+        $service = app(OrderEmailService::class);
+        $extraEmail = $request->email;
+
+        $result = $service->sendPaymentCompleted($order, $extraEmail);
+        $fallbackUsed = false;
+        if (!empty($result['error'])) {
+            $result = $service->sendOrderPlaced($order, $extraEmail);
+            $fallbackUsed = true;
+        }
+
+        $notify = [];
+        if (!empty($result['error']) && empty($result['sent'])) {
+            $notify[] = ['error', $result['error']];
+            return back()->withNotify($notify);
+        }
+
+        if (!empty($result['sent'])) {
+            $label = $fallbackUsed ? 'Order placed email' : 'Purchase email';
+            $notify[] = ['success', $label . ' sent to: ' . implode(', ', $result['sent'])];
+        }
+        if (!empty($result['failed'])) {
+            $notify[] = ['error', 'Failed for: ' . implode(', ', $result['failed'])];
+        }
+
+        return back()->withNotify($notify);
     }
 }

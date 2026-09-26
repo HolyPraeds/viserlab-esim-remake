@@ -27,3 +27,4 @@ Route::get('/regions/{slug}/plans', [ApiController::class, 'regionPlans']);
 Route::get('/search/countries', [ApiController::class, 'searchCountries']);
 Route::get('/plans', [ApiController::class, 'allPlans']);
 Route::get('/plans/{id}', [ApiController::class, 'planDetails']);
+Route::get('/currency/rates', [ApiController::class, 'currencyRates'])->name('api.currency.rates');

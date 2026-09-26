@@ -90,7 +90,22 @@
 
                         <div class="address-items__content">
                             <h5 class="address-items__title">{{ __($content->data_values?->phone_title) }}</h5>
-                            <span class="address-items__info">+447413018997</span>
+                            <span class="address-items__info">+44 7413 018997</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-4" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="500">
+                    <div class="address-items">
+                        <div class="address-items__shape">
+                            <div class="box"></div>
+                            <div class="image"></div>
+                        </div>
+                        <div class="address-items__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--base))" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="address-items__content">
+                            <h5 class="address-items__title">@lang('Working Hours')</h5>
+                            <p class="address-items__info">@lang('Mon–Fri 9:00–18:00 GMT')<br>@lang('Sat 10:00–16:00 GMT')</p>
                         </div>
                     </div>
                 </div>

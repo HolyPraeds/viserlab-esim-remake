@@ -21,19 +21,53 @@
                                 <th class="small">@lang('Date')</th>
                                 <th class="small">@lang('TRX')</th>
                                 <th class="small">@lang('Amount')</th>
-                                <th class="small">@lang('Charge')</th>
-                                <th class="small">@lang('Total')</th>
+                                <th class="small">@lang('Credits Added')</th>
                                 <th class="small text-end">@lang('Status')</th>
                             </tr>
                         </thead>
                         <tbody>
                         @forelse($deposits as $deposit)
+                            @php
+                                // Определяем символ валюты
+                                $currencySymbols = ['EUR' => '€', 'GBP' => '£', 'USD' => '$'];
+                                $paymentCurrency = $deposit->method_currency ?? 'EUR';
+                                $currencySymbol = $currencySymbols[$paymentCurrency] ?? '€';
+                                
+                                // Вычисляем сколько кредитов (EUR) было добавлено
+                                // Используем ту же логику, что и в PaymentController::userDataUpdate
+                                $creditsAdded = $deposit->amount;
+                                if ($deposit->status == 1 && $deposit->order_id == 0) { // PAYMENT_SUCCESS = 1
+                                    if ($paymentCurrency !== 'EUR') {
+                                        $exchangeRates = [
+                                            'GBP' => 0.87,  // 1 EUR = 0.87 GBP => 1 GBP = 1/0.87 EUR
+                                            'USD' => 1.18,  // 1 EUR = 1.18 USD => 1 USD = 1/1.18 EUR
+                                        ];
+                                        if (isset($exchangeRates[$paymentCurrency])) {
+                                            $creditsAdded = $deposit->amount / $exchangeRates[$paymentCurrency];
+                                        }
+                                    }
+                                }
+                                
+                                // Показываем оригинальную сумму депозита
+                                $originalAmount = number_format($deposit->amount, 2);
+                            @endphp
                             <tr>
                                 <td>{{ showDateTime($deposit->created_at) }}</td>
                                 <td>{{ $deposit->trx }}</td>
-                                <td>{{ showAmount($deposit->amount) }} {{ __(gs('cur_text')) }}</td>
-                                <td>{{ showAmount($deposit->charge) }} {{ __(gs('cur_text')) }}</td>
-                                <td>{{ showAmount($deposit->final_amount) }} {{ __(gs('cur_text')) }}</td>
+                                <td>
+                                    <div>
+                                        {{ $currencySymbol }}{{ $originalAmount }} {{ $paymentCurrency }}
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($deposit->status == 1) {{-- PAYMENT_SUCCESS --}}
+                                        <div>
+                                            {{ number_format($creditsAdded, 2) }} Credits
+                                        </div>
+                                    @else
+                                        <div class="text-muted">-</div>
+                                    @endif
+                                </td>
                                 <td class="text-end status-cell">
                                     <span class="status-badge">{!! $deposit->statusBadge !!}</span>
                                     <form action="{{ url('webhooks/alppay') }}" method="GET">
@@ -43,7 +77,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">@lang('No deposits found')</td>
+                                <td colspan="5" class="text-center py-4">@lang('No deposits found')</td>
                             </tr>
                         @endforelse
                         </tbody>

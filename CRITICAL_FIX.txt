@@ -1,0 +1,60 @@
+═══════════════════════════════════════════════════════════════
+  КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: API маршруты не загружаются!
+═══════════════════════════════════════════════════════════════
+
+❌ ПРОБЛЕМА:
+   Route [api.currency.rates] not defined
+   
+   Причина: В файле bootstrap/app.php НЕ загружаются API маршруты!
+
+✅ РЕШЕНИЕ:
+───────────────────────────────────────────────────────────────
+
+1. Обновить файл core/bootstrap/app.php
+   
+   В функции withRouting(), после загрузки web маршрутов, 
+   ДОБАВИТЬ строку:
+   
+   Route::middleware(['api'])->prefix('api')->group(base_path('routes/api.php'));
+
+2. Очистить кэши:
+   
+   cd core
+   php artisan route:clear
+   php artisan config:clear
+   php artisan cache:clear
+
+3. Проверить маршрут:
+   
+   php artisan route:list | grep currency
+   
+   Должна появиться строка:
+   GET|HEAD  api/currency/rates ... ApiController@currencyRates
+
+═══════════════════════════════════════════════════════════════
+  ИЗМЕНЕНИЯ В ФАЙЛЕ bootstrap/app.php:
+═══════════════════════════════════════════════════════════════
+
+БЫЛО:
+    Route::middleware(['web','maintenance'])->group(base_path('routes/web.php'));
+    
+    });
+}
+
+СТАЛО:
+    Route::middleware(['web','maintenance'])->group(base_path('routes/web.php'));
+    
+    });
+
+    // API routes
+    Route::middleware(['api'])->prefix('api')->group(base_path('routes/api.php'));
+}
+
+═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+

@@ -125,6 +125,13 @@ class NotifyProcess{
     */
 	public $userColumn;
 
+    /**
+    * Email attachments: array of ['path' => path, 'name' => filename]
+    *
+    * @var array
+    */
+	public $emailAttachments = [];
+
 
     /**
     * Address of receiver, like email, mobile number etc

@@ -26,8 +26,9 @@
     @stack('style')
 
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/color.php') }}?color={{ gs('base_color') }}">
+    
+    @php echo loadExtension('google-analytics') @endphp
 </head>
-@php echo loadExtension('google-analytics') @endphp
 
 <body>
     @stack('fbComment')

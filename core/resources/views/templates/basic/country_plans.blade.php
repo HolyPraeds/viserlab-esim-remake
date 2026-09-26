@@ -15,24 +15,33 @@
                 </p>
             </div>
 
-            <form action="{{ route('user.plan.purchase') }}" method="POST">
+            <form action="{{ route('user.plan.purchase') }}" method="POST" id="planPurchaseForm">
                 @csrf
-                @php
-                    $plans = $country->plans->sortBy('retail_price');
-                @endphp
+                <input type="hidden" name="site_currency" id="site_currency_input" value="EUR">
                 <div class="row gy-4">
                     <div class="col-lg-8 ">
                         <div class="choose-plan-item-container">
                             @foreach ($plans as $index => $plan)
                                 @php
                                     $inputId = 'plan' . $index;
-                                    $capacityGb = $plan->capacity < 0 ? null : (int) round(($plan->capacity ?? 0) / 1073741824);
+                                    $baseAmount = planCustomerPrice($plan);
+                                    // Некоторые планы от провайдера имеют capacity ~= 2GB для разных объёмов (3GB/5GB/10GB/20GB),
+                                    // поэтому сначала пробуем достать объём из названия плана (Nigeria 3GB 30Days и т.п.).
+                                    $capacityGbFromName = null;
+                                    if (preg_match('/\b(\d+(?:\.\d+)?)\s*GB\b/i', $plan->name, $m)) {
+                                        $capacityGbFromName = (float) $m[1];
+                                    }
+                                    $capacityGbBytes = $plan->capacity < 0 ? null : max(0.01, round(($plan->capacity ?? 0) / 1073741824, 2));
+                                    $displayCapacityGb = $capacityGbFromName ?? $capacityGbBytes;
+                                    $displayCapacityText = $displayCapacityGb === null
+                                        ? ''
+                                        : rtrim(rtrim(number_format((float) $displayCapacityGb, 2, '.', ''), '0'), '.');
                                 @endphp
                                 <label class="choose-plan-item" for="{{ $inputId }}">
                                     <span class="choose-plan-item__content">
                                         <div class="choose-plan-item__content-wrapper">
                                             <h6 class="choose-plan-item__capacity">
-                                                {{ $plan->capacity < 0 ? __('Unlimited') : ($capacityGb . ' GB') }}
+                                                {{ $plan->capacity < 0 ? __('Unlimited') : ($displayCapacityText . ' GB') }}
                                             </h6>
                                             <span class="choose-plan-item__validity">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer-icon lucide-timer">
@@ -45,11 +54,11 @@
                                                 @lang('days')
                                             </span>
                                         </div>
-                                        <span class="choose-plan-item__price">
-                                            {{ $plan->price_currency }} {{ number_format($plan->retail_price, 2) }}
+                                        <span class="choose-plan-item__price" data-base-amount="{{ $baseAmount }}" data-base-currency="EUR">
+                                            EUR {{ number_format($baseAmount, 2) }}
                                         </span>
                                     </span>
-                                    <input class="d-none" type="radio" name="plan_id" data-price="{{ $plan->price_currency }} {{ number_format($plan->price, 2) }}" data-validity="{{ $plan->period }}" data-capacity="{{ round($plan->capacity / 1073741824, 2) }}" data-capacity-unit="GB" data-speed="{{ $plan->speed }}" id="{{ $inputId }}" value="{{ $plan->id }}" @checked($loop->first) />
+                                    <input class="d-none" type="radio" name="plan_id" data-price="EUR {{ number_format($baseAmount, 2) }}" data-base-amount="{{ $baseAmount }}" data-base-currency="EUR" data-validity="{{ $plan->period }}" data-capacity="{{ $plan->capacity < 0 ? -1 : $displayCapacityGb }}" data-capacity-unit="GB" data-speed="{{ $plan->speed }}" id="{{ $inputId }}" value="{{ $plan->id }}" @checked($loop->first) />
                                     <span class="choose-plan-item__input"></span>
                                 </label>
                             @endforeach
@@ -60,19 +69,9 @@
                         <div class="choose-plan-sidebar">
                             <div class="choose-plan-sidebar__header">
                                 <div class="choose-plan-info">
-                                    <div class="choose-plan-info__flag">
-                                        @if ($country->image)
-                                            <img src="{{ getImage(getFilePath('countryFlag') . '/' . $country->image, getFileSize('countryFlag')) }}" alt="united-flag">
-                                        @else
-                                            <span class="country-code-avatar">
-                                                {{ __($country->code) }}
-                                            </span>
-                                        @endif
-                                    </div>
+                                    {{-- Simplify: no flag image to avoid broken/placeholder images --}}
                                     <div class="choose-plan-info__content">
                                         <h6 class="choose-plan-info__title">{{ __($country->name) }}'s @lang('eSIM')</h6>
-                                        <p class="choose-plan-info__desc">
-                                            {{ __($content?->data_values?->description) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -159,20 +158,47 @@
             }
 
             function updatePlanDetails(planInput) {
-                        const price = $(planInput).data('price');
+                        const baseAmount = parseFloat($(planInput).data('base-amount')) || 0;
+                        const baseCurrency = $(planInput).data('base-currency') || 'EUR';
                         const validity = $(planInput).data('validity');
                         const capacity = $(planInput).data('capacity');
                         const capacityUnit = $(planInput).data('capacity-unit');
                         const speed = $(planInput).data('speed');
 
                         let capacityText = capacity < 0 ? 'Unlimited' : `${capacity} ${capacityUnit}`;
+                        
+                        // Get current currency from global
+                        const currentCurrency = window.globalCurrency || 'EUR';
+                        const EXCHANGE_RATES = {
+                            'GBP': 0.87,  // 1 EUR = 0.87 GBP
+                            'USD': 1.18   // 1 EUR = 1.18 USD
+                        };
+                        
+                        // Convert price if needed
+                        let displayPrice;
+                        if (currentCurrency === 'EUR') {
+                            displayPrice = 'EUR ' + baseAmount.toFixed(2);
+                        } else if (EXCHANGE_RATES[currentCurrency]) {
+                            const converted = baseAmount * EXCHANGE_RATES[currentCurrency];
+                            displayPrice = currentCurrency + ' ' + converted.toFixed(2);
+                        } else {
+                            displayPrice = 'EUR ' + baseAmount.toFixed(2);
+                        }
 
-                        $('.dataPrice').text(price);
+                        $('.dataPrice').text(displayPrice);
                         $('.dataValidity').text(validity + ' Days');
                         $('.dataCapacity').text(capacityText);
-                        $('.dataTotalPrice').text(price);
+                        $('.dataTotalPrice').text(displayPrice);
                         $('.dataSpeed').text(speed || 'N/A');
                     }
+                    
+                    // Listen for currency changes
+                    window.addEventListener('currencyChanged', function() {
+                        const selectedPlan = $('input[name="plan_id"]:checked');
+                        if (selectedPlan.length) {
+                            updatePlanDetails(selectedPlan[0]);
+                        }
+                    });
 
             $(document).ready(function() {
                 console.log('Document ready - initializing wallet purchase form');
@@ -183,6 +209,13 @@
                 $('input[name="plan_id"]').on('change', function() {
                     console.log('Plan changed to:', $(this).val());
                     updatePlanDetails(this);
+                });
+                
+                // Update currency before form submit
+                $('#planPurchaseForm').on('submit', function(e) {
+                    const currentCurrency = window.globalCurrency || localStorage.getItem('selectedCurrency') || 'EUR';
+                    $('#site_currency_input').val(currentCurrency);
+                    console.log('Form submitting with currency:', currentCurrency);
                 });
                 
             });

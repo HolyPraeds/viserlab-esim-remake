@@ -81,7 +81,7 @@
                                     </td>
 
                                     <td class="budget">
-                                        {{ showAmount($trx->post_balance) }}
+                                        {{ showAmount($trx->post_balance, 2, true, false, true, true) }}
                                     </td>
 
                                     <td>{{ __($trx->details) }}</td>

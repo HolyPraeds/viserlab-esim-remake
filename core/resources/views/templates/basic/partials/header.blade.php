@@ -29,11 +29,6 @@
                              @lang('Destination')
                          </a>
                      </li>
-                     <li class="nav-item {{ menuActive('blogs') }}">
-                         <a class="nav-link" href="{{ route('blogs') }}">
-                             @lang('Blog')
-                         </a>
-                     </li>
                      <li class="nav-item {{ menuActive('contact') }}">
                          <a class="nav-link" href="{{ route('contact') }}">
                              @lang('Contact')
@@ -43,8 +38,21 @@
                  </ul>
              </div>
 
-             <div class="navbar-auth-area order-2 order-lg-4 ms-auto">
-                 @auth
+            <div class="navbar-auth-area order-2 order-lg-4 ms-auto d-flex align-items-center gap-3">
+                {{-- Currency Switcher --}}
+                <div class="currency-switcher" style="display: flex; gap: 5px; align-items: center;">
+                    <button type="button" class="btn-currency btn-currency-eur" data-currency="EUR" style="padding: 5px 12px; border: 1px solid #ddd; background: #fff; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s;">
+                        € EUR
+                    </button>
+                    <button type="button" class="btn-currency btn-currency-gbp" data-currency="GBP" style="padding: 5px 12px; border: 1px solid #ddd; background: #fff; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s;">
+                        £ GBP
+                    </button>
+                    <button type="button" class="btn-currency btn-currency-usd" data-currency="USD" style="padding: 5px 12px; border: 1px solid #ddd; background: #fff; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s;">
+                        $ USD
+                    </button>
+                </div>
+
+                @auth
                      <div class="dropdown dropdown--user">
                          <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                              <span class="dropdown-toggle__avatar">
@@ -58,13 +66,13 @@
                          <div class="dropdown-menu">
                              <div class="dropdown-user">
                                  <div class="dropdown-user__avatar">{{ auth()->user()->fullname[0] }}</div>
-                                 <div class="dropdown-user__content">
-                                     <span class="dropdown-user__name">{{ auth()->user()->fullname }}</span>
-                                     <span class="dropdown-user__username">{{ auth()->user()->username }}</span>
-                                     <div class="dropdown-user__balance" style="margin-top: 5px; padding: 3px 8px; background: rgba(0,0,0,0.05); border-radius: 10px; font-size: 11px; font-weight: 600;">
-                                         <span style="color: #28a745;">💰 {{ showAmount(auth()->user()->balance) }}</span>
-                                     </div>
-                                 </div>
+                                <div class="dropdown-user__content">
+                                    <span class="dropdown-user__name">{{ auth()->user()->fullname }}</span>
+                                    <span class="dropdown-user__username">{{ auth()->user()->username }}</span>
+                                    <div class="dropdown-user__balance" style="margin-top: 5px; padding: 3px 8px; background: rgba(0,0,0,0.05); border-radius: 10px; font-size: 11px; font-weight: 600;">
+                                        <span style="color: #28a745;">💰 {{ showAmount(auth()->user()->balance, 2, true, false, true, true) }}</span>
+                                    </div>
+                                </div>
                              </div>
 
                              <div class="dropdown-menu-wrapper">
@@ -137,6 +145,305 @@
                      </a>
                  @endauth
              </div>
-         </nav>
-     </div>
- </header>
+        </nav>
+    </div>
+</header>
+
+@push('script')
+<script>
+    (function() {
+        'use strict';
+        
+        // Fixed exchange rates
+        const EXCHANGE_RATES = {
+            'GBP': 0.87,  // 1 EUR = 0.87 GBP
+            'USD': 1.18   // 1 EUR = 1.18 USD
+        };
+        const BASE_CURRENCY = 'EUR';
+        
+        // Currency symbols
+        const CURRENCY_SYMBOLS = {
+            'EUR': '€',
+            'GBP': '£',
+            'USD': '$'
+        };
+        
+        // Get current currency from localStorage or default to EUR
+        let currentCurrency = localStorage.getItem('selectedCurrency') || BASE_CURRENCY;
+        
+        // Initialize currency switcher
+        function initCurrencySwitcher() {
+            const eurBtn = document.querySelector('.btn-currency-eur');
+            const gbpBtn = document.querySelector('.btn-currency-gbp');
+            const usdBtn = document.querySelector('.btn-currency-usd');
+            
+            if (!eurBtn || !gbpBtn || !usdBtn) {
+                console.warn('Currency buttons not found, retrying...');
+                setTimeout(initCurrencySwitcher, 100);
+                return;
+            }
+            
+            // Set active button
+            updateActiveButton();
+            
+            // Add click handlers
+            eurBtn.addEventListener('click', () => switchCurrency('EUR'));
+            gbpBtn.addEventListener('click', () => switchCurrency('GBP'));
+            usdBtn.addEventListener('click', () => switchCurrency('USD'));
+            
+            console.log('Currency switcher initialized');
+        }
+        
+        // Update active button style
+        function updateActiveButton() {
+            const eurBtn = document.querySelector('.btn-currency-eur');
+            const gbpBtn = document.querySelector('.btn-currency-gbp');
+            const usdBtn = document.querySelector('.btn-currency-usd');
+            
+            // Reset all buttons
+            [eurBtn, gbpBtn, usdBtn].forEach(btn => {
+                if (btn) {
+                    btn.style.background = '#fff';
+                    btn.style.color = '#000';
+                    btn.style.borderColor = '#ddd';
+                }
+            });
+            
+            // Set active button
+            const activeBtn = document.querySelector(`.btn-currency-${currentCurrency.toLowerCase()}`);
+            if (activeBtn) {
+                activeBtn.style.background = '#007bff';
+                activeBtn.style.color = '#fff';
+                activeBtn.style.borderColor = '#007bff';
+            }
+        }
+        
+        // Switch currency
+        function switchCurrency(currency) {
+            if (currency === currentCurrency) return;
+            
+            currentCurrency = currency;
+            localStorage.setItem('selectedCurrency', currency);
+            
+            // Update global currency immediately
+            window.globalCurrency = currency;
+            
+            updateActiveButton();
+            updateAllPrices();
+            
+            // Dispatch event for other scripts
+            window.dispatchEvent(new CustomEvent('currencyChanged', { detail: { currency } }));
+        }
+        
+        // Convert price
+        function convertPrice(amount, fromCurrency, toCurrency) {
+            if (fromCurrency === toCurrency) return amount;
+            
+            // Always convert from EUR (base currency) to target currency
+            if (fromCurrency === BASE_CURRENCY && EXCHANGE_RATES[toCurrency]) {
+                return amount * EXCHANGE_RATES[toCurrency];
+            }
+            
+            // Convert from target currency back to EUR (base)
+            if (toCurrency === BASE_CURRENCY && EXCHANGE_RATES[fromCurrency]) {
+                return amount / EXCHANGE_RATES[fromCurrency];
+            }
+            
+            return amount;
+        }
+        
+        // Format price
+        function formatPrice(amount) {
+            return parseFloat(amount).toFixed(2);
+        }
+        
+        // Update all prices on page
+        function updateAllPrices() {
+            // Update prices in choose-plan-item__price (using data attributes)
+            document.querySelectorAll('.choose-plan-item__price').forEach(function(element) {
+                // Try to get base amount from data attribute first
+                const baseAmount = parseFloat(element.getAttribute('data-base-amount'));
+                const baseCurrency = element.getAttribute('data-base-currency') || BASE_CURRENCY;
+                
+                if (!isNaN(baseAmount) && baseAmount > 0) {
+                    // Use data attributes
+                    if (currentCurrency === BASE_CURRENCY) {
+                        // Show original EUR price
+                        const formatted = formatPrice(baseAmount);
+                        element.innerHTML = formatted + ' <span class="currency">EUR</span>';
+                    } else {
+                        // Convert to target currency
+                        const converted = convertPrice(baseAmount, baseCurrency, currentCurrency);
+                        const formatted = formatPrice(converted);
+                        element.innerHTML = formatted + ' <span class="currency">' + currentCurrency + '</span>';
+                    }
+                } else {
+                    // Fallback: parse from text
+                    const currencySpan = element.querySelector('.currency');
+                    if (!currencySpan) return;
+                    
+                    let text = element.textContent.trim();
+                    const currencyMatch = text.match(/([€£$]|EUR|GBP|USD)\s*([\d,]+\.?\d*)/);
+                    
+                    if (currencyMatch) {
+                        const baseAmount = parseFloat(currencyMatch[2].replace(/,/g, ''));
+                        let baseCurrency = BASE_CURRENCY;
+                        if (currencyMatch[1] === '£' || currencyMatch[1] === 'GBP') baseCurrency = 'GBP';
+                        else if (currencyMatch[1] === '$' || currencyMatch[1] === 'USD') baseCurrency = 'USD';
+                        
+                        if (currentCurrency === BASE_CURRENCY) {
+                            const formatted = formatPrice(baseAmount);
+                            element.innerHTML = formatted + ' <span class="currency">EUR</span>';
+                        } else {
+                            const converted = convertPrice(baseAmount, baseCurrency, currentCurrency);
+                            const formatted = formatPrice(converted);
+                            element.innerHTML = formatted + ' <span class="currency">' + currentCurrency + '</span>';
+                        }
+                    }
+                }
+            });
+            
+            // Update prices in esim-plan-card__price (using data attributes)
+            document.querySelectorAll('.esim-plan-card__price').forEach(function(element) {
+                // Try to get base amount from data attribute first
+                const baseAmount = parseFloat(element.getAttribute('data-base-amount'));
+                const baseCurrency = element.getAttribute('data-base-currency') || BASE_CURRENCY;
+                
+                if (!isNaN(baseAmount) && baseAmount > 0) {
+                    // Use data attributes
+                    if (currentCurrency === BASE_CURRENCY) {
+                        // Show original EUR price
+                        const formatted = formatPrice(baseAmount);
+                        element.textContent = 'From ' + CURRENCY_SYMBOLS[BASE_CURRENCY] + formatted + ' ' + BASE_CURRENCY;
+                    } else {
+                        // Convert to target currency
+                        const converted = convertPrice(baseAmount, baseCurrency, currentCurrency);
+                        const formatted = formatPrice(converted);
+                        element.textContent = 'From ' + CURRENCY_SYMBOLS[currentCurrency] + formatted + ' ' + currentCurrency;
+                    }
+                } else {
+                    // Fallback: parse from text
+                    let text = element.textContent.trim();
+                    const match = text.match(/From\s*([€£$]|EUR|GBP|USD)?\s*([\d,]+\.?\d*)\s*(EUR|GBP|USD)?/i);
+                    
+                    if (match) {
+                        const amount = parseFloat(match[2].replace(/,/g, ''));
+                        let baseCurrency = BASE_CURRENCY;
+                        
+                        if (match[1] === '£' || match[3] === 'GBP') {
+                            baseCurrency = 'GBP';
+                        } else if (match[1] === '$' || match[3] === 'USD') {
+                            baseCurrency = 'USD';
+                        }
+                        
+                        if (currentCurrency === BASE_CURRENCY) {
+                            const formatted = formatPrice(amount);
+                            element.textContent = 'From ' + CURRENCY_SYMBOLS[BASE_CURRENCY] + formatted + ' ' + BASE_CURRENCY;
+                        } else {
+                            const converted = convertPrice(amount, baseCurrency, currentCurrency);
+                            const formatted = formatPrice(converted);
+                            element.textContent = 'From ' + CURRENCY_SYMBOLS[currentCurrency] + formatted + ' ' + currentCurrency;
+                        }
+                    }
+                }
+            });
+            
+            // Update prices in destination page (country cards)
+            document.querySelectorAll('.country-card__price, .search-result-item__price').forEach(function(element) {
+                const baseAmount = parseFloat(element.getAttribute('data-base-amount'));
+                const baseCurrencyAttr = element.getAttribute('data-base-currency') || BASE_CURRENCY;
+                
+                if (!isNaN(baseAmount) && baseAmount > 0) {
+                    if (currentCurrency === BASE_CURRENCY) {
+                        const formatted = formatPrice(baseAmount);
+                        // Remove existing currency elements and add new one
+                        element.querySelectorAll('.currency').forEach(el => el.remove());
+                        element.textContent = CURRENCY_SYMBOLS[BASE_CURRENCY] + formatted + ' ';
+                        const currencySpan = document.createElement('span');
+                        currencySpan.className = 'currency';
+                        currencySpan.textContent = BASE_CURRENCY;
+                        element.appendChild(currencySpan);
+                    } else {
+                        const converted = convertPrice(baseAmount, baseCurrencyAttr, currentCurrency);
+                        const formatted = formatPrice(converted);
+                        // Remove existing currency elements and add new one
+                        element.querySelectorAll('.currency').forEach(el => el.remove());
+                        element.textContent = CURRENCY_SYMBOLS[currentCurrency] + formatted + ' ';
+                        const currencySpan = document.createElement('span');
+                        currencySpan.className = 'currency';
+                        currencySpan.textContent = currentCurrency;
+                        element.appendChild(currencySpan);
+                    }
+                } else {
+                    // Fallback: parse from text
+                    let text = element.textContent.trim();
+                    const match = text.match(/([€£$]|EUR|GBP|USD)?\s*([\d,]+\.?\d*)\s*(EUR|GBP|USD)?/i);
+                    
+                    if (match) {
+                        const amount = parseFloat(match[2].replace(/,/g, ''));
+                        let baseCurrency = BASE_CURRENCY;
+                        
+                        if (match[1] === '£' || match[3] === 'GBP') {
+                            baseCurrency = 'GBP';
+                        } else if (match[1] === '$' || match[3] === 'USD') {
+                            baseCurrency = 'USD';
+                        }
+                        
+                        if (currentCurrency === BASE_CURRENCY) {
+                            const formatted = formatPrice(amount);
+                            element.textContent = CURRENCY_SYMBOLS[BASE_CURRENCY] + formatted + ' ' + BASE_CURRENCY;
+                        } else {
+                            const converted = convertPrice(amount, baseCurrency, currentCurrency);
+                            const formatted = formatPrice(converted);
+                            element.textContent = CURRENCY_SYMBOLS[currentCurrency] + formatted + ' ' + currentCurrency;
+                        }
+                    }
+                }
+            });
+            
+            // Update sidebar plan details
+            const sidebarPrice = document.querySelector('.choose-plan-sidebar__price');
+            if (sidebarPrice) {
+                const selectedPlan = document.querySelector('input[name="plan_id"]:checked');
+                if (selectedPlan && selectedPlan.dataset.price) {
+                    const priceData = selectedPlan.dataset.price.split(' ');
+                    if (priceData.length >= 2) {
+                        const baseCurrency = priceData[0];
+                        const amount = parseFloat(priceData[1]);
+                        
+                        if (currentCurrency === BASE_CURRENCY) {
+                            sidebarPrice.textContent = CURRENCY_SYMBOLS[BASE_CURRENCY] + formatPrice(amount) + ' ' + BASE_CURRENCY;
+                        } else {
+                            const converted = convertPrice(amount, baseCurrency, currentCurrency);
+                            sidebarPrice.textContent = CURRENCY_SYMBOLS[currentCurrency] + formatPrice(converted) + ' ' + currentCurrency;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Initialize on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                initCurrencySwitcher();
+                updateAllPrices();
+                
+                // Set initial global currency
+                window.globalCurrency = currentCurrency;
+            });
+        } else {
+            // DOM already loaded
+            initCurrencySwitcher();
+            updateAllPrices();
+            window.globalCurrency = currentCurrency;
+        }
+        
+        // Make functions globally available
+        window.switchCurrency = switchCurrency;
+        window.updateAllPrices = updateAllPrices;
+        
+        // Set initial global currency
+        window.globalCurrency = currentCurrency;
+    })();
+</script>
+@endpush

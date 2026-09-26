@@ -1,0 +1,231 @@
+/* 
+ * Современный дизайн для страниц политик
+ * Скопируйте этот CSS в ваш проект и используйте классы из HTML примера
+ */
+
+/* Reset and Base Styles */
+.policy-section {
+    padding: 2rem 0;
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.policy-container {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin: 2rem auto;
+    max-width: 1200px;
+}
+
+.policy-content {
+    padding: 3rem 2.5rem;
+    color: #1e293b;
+    line-height: 1.8;
+    font-size: 16px;
+}
+
+/* Header Styles */
+.policy-content h3 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #007bff;
+    position: relative;
+}
+
+.policy-content h3::before {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+}
+
+/* Company Info Header */
+.policy-content .company-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.policy-content .company-header p {
+    margin: 0.5rem 0;
+    font-size: 15px;
+    opacity: 0.95;
+}
+
+.policy-content .company-header .company-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* Section Headings */
+.policy-content h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    border-left: 4px solid #007bff;
+    position: relative;
+}
+
+.policy-content h4:first-of-type {
+    margin-top: 0;
+}
+
+/* Paragraphs */
+.policy-content p {
+    margin: 1rem 0;
+    color: #475569;
+    text-align: justify;
+}
+
+.policy-content p.lead {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 17px;
+    margin-bottom: 1.25rem;
+}
+
+/* Lists */
+.policy-content ul,
+.policy-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+    color: #475569;
+}
+
+.policy-content li {
+    margin: 0.75rem 0;
+    line-height: 1.7;
+}
+
+.policy-content ul li::marker {
+    color: #007bff;
+}
+
+/* Sub-sections */
+.policy-content h5 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Highlighted Sections */
+.policy-content .highlight-box {
+    background: #f0f9ff;
+    border-left: 4px solid #007bff;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.policy-content .warning-box {
+    background: #fff7ed;
+    border-left: 4px solid #f59e0b;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+}
+
+.policy-content .info-box {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+}
+
+/* Contact Section */
+.policy-content .contact-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-top: 2.5rem;
+    border: 2px solid #e2e8f0;
+}
+
+.policy-content .contact-section h4 {
+    margin-top: 0;
+    color: #0f172a;
+}
+
+/* Link Styles */
+.policy-content a {
+    color: #007bff;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.policy-content a:hover {
+    color: #0056b3;
+    border-bottom-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .policy-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .policy-content h3 {
+        font-size: 1.75rem;
+    }
+
+    .policy-content h4 {
+        font-size: 1.3rem;
+    }
+
+    .policy-content {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .policy-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .policy-content h3 {
+        font-size: 1.5rem;
+    }
+
+    .policy-content h4 {
+        font-size: 1.15rem;
+        padding-left: 0.75rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .policy-section {
+        background: #fff;
+    }
+
+    .policy-container {
+        box-shadow: none;
+        border: 1px solid #e5e7eb;
+    }
+
+    .policy-content h3,
+    .policy-content h4 {
+        page-break-after: avoid;
+    }
+}

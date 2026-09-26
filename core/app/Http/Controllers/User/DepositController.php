@@ -4,7 +4,6 @@ namespace App\Http\Controllers\User;
 
 use App\Constants\Status;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Gateway\PaymentController;
 use App\Models\Deposit;
 use App\Models\GatewayCurrency;
 use App\Models\Transaction;
@@ -17,6 +16,8 @@ class DepositController extends Controller
 {
     public function index()
     {
+        finalizePendingAlpPayDepositsForUser(auth()->user());
+
         $pageTitle = 'Deposit History';
         $deposits = auth()->user()->deposits()->searchable(['trx'])->with(['gateway'])->orderBy('id', 'desc')->paginate(getPaginate());
         return view('Template::user.deposit.index', compact('pageTitle', 'deposits'));
@@ -24,66 +25,121 @@ class DepositController extends Controller
 
     public function deposit()
     {
-        // Только Taurixy для пополнения
-        $gatewayCurrency = GatewayCurrency::whereHas('method', function ($gate) {
-            $gate->where('status', Status::ENABLE)->where('id', 0);
-        })->where('currency', 'EUR')->with('method')->first();
+        // Убеждаемся, что все три валюты существуют и имеют правильные лимиты 1-2800
+        $method = \App\Models\Gateway::where('code', 0)->where('status', Status::ENABLE)->first();
+        if (!$method) {
+            $notify[] = ['error', 'Payment method not available'];
+            return back()->withNotify($notify);
+        }
+        
+        $currencies = [
+            ['currency' => 'EUR', 'symbol' => '€', 'name' => 'Euro'],
+            ['currency' => 'GBP', 'symbol' => '£', 'name' => 'British Pound'],
+            ['currency' => 'USD', 'symbol' => '$', 'name' => 'US Dollar'],
+        ];
+        
+        foreach ($currencies as $curr) {
+            GatewayCurrency::updateOrCreate(
+                [
+                    'method_code' => 0,
+                    'currency' => $curr['currency']
+                ],
+                [
+                    'name' => $curr['name'],
+                    'symbol' => $curr['symbol'],
+                    'gateway_alias' => 'taurixy',
+                    'min_amount' => 1,
+                    'max_amount' => 2800,
+                    'percent_charge' => 0,
+                    'fixed_charge' => 0,
+                    'rate' => 1,
+                ]
+            );
+        }
+        
+        // Получаем все валюты с правильным порядком (EUR, GBP, USD) и обновляем лимиты, если нужно
+        $gatewayCurrencies = GatewayCurrency::whereHas('method', function ($gate) {
+            $gate->where('status', Status::ENABLE)->where('code', 0);
+        })->whereIn('currency', ['EUR', 'GBP', 'USD'])
+        ->with('method')
+        ->orderByRaw("FIELD(currency, 'EUR', 'GBP', 'USD')")
+        ->get();
+        
+        // Обновляем лимиты для всех записей до 1-2800
+        foreach ($gatewayCurrencies as $gc) {
+            if ($gc->min_amount != 1 || $gc->max_amount != 2800) {
+                $gc->min_amount = 1;
+                $gc->max_amount = 2800;
+                $gc->save();
+            }
+        }
 
-        if (!$gatewayCurrency) {
-            $notify[] = ['error', 'Taurixy payment method not available'];
+        if ($gatewayCurrencies->isEmpty()) {
+            $notify[] = ['error', 'Payment method not available'];
             return back()->withNotify($notify);
         }
 
         $pageTitle = 'Add Balance';
-        return view('Template::user.payment.deposit', compact('gatewayCurrency', 'pageTitle'));
+        return view('Template::user.payment.deposit', compact('gatewayCurrencies', 'pageTitle'));
     }
 
     public function depositInsert(Request $request)
     {
         $request->validate([
-            'amount' => 'required|numeric|gt:0'
+            'amount' => 'required|numeric|gt:0',
+            'currency' => 'required|in:EUR,GBP,USD'
         ]);
 
         $user = auth()->user();
+        $selectedCurrency = $request->input('currency', 'EUR');
         
-        // Только Taurixy gateway
+        // Получаем gateway для выбранной валюты
         $gate = GatewayCurrency::whereHas('method', function ($gate) {
-            $gate->where('status', Status::ENABLE)->where('id', 0);
-        })->where('currency', 'EUR')->first();
+            $gate->where('status', Status::ENABLE)->where('code', 0);
+        })->where('currency', $selectedCurrency)->first();
 
         if (!$gate) {
-            $notify[] = ['error', 'Taurixy payment method not available'];
+            $notify[] = ['error', 'Payment method not available for ' . $selectedCurrency];
             return back()->withNotify($notify);
         }
 
+        // Устанавливаем лимиты, если они неправильные
+        if ($gate->min_amount != 1 || $gate->max_amount != 2800) {
+            $gate->min_amount = 1;
+            $gate->max_amount = 2800;
+            $gate->save();
+        }
+
         if ($gate->min_amount > $request->amount || $gate->max_amount < $request->amount) {
-            $notify[] = ['error', 'Please follow deposit limit'];
+            $notify[] = ['error', 'Please follow deposit limit (1 - 2800 ' . $selectedCurrency . ')'];
             return back()->withNotify($notify);
         }
 
         $charge = $gate->fixed_charge + ($request->amount * $gate->percent_charge / 100);
         $payable = $request->amount + $charge;
-        $finalAmount = $payable; // Для EUR не конвертируем
+        $finalAmount = $payable;
 
         $data = new Deposit();
         $data->user_id = $user->id;
-        $data->method_code = '0'; // Только Taurixy
-        $data->method_currency = 'EUR';
+        $data->order_id = 0;
+        $data->method_code = 0; // Taurixy / AlpPay (must match gateways.code)
+        $data->method_currency = $selectedCurrency;
         $data->amount = $request->amount;
         $data->charge = $charge;
-        $data->rate = 1.0; // Для EUR
+        $data->rate = 1.0;
         $data->final_amount = $finalAmount;
         $data->btc_amount = 0;
         $data->btc_wallet = "";
         $data->trx = getTrx();
+        $data->status = Status::PAYMENT_INITIATE;
         $data->success_url = route('user.deposit.history');
         $data->failed_url = route('user.deposit.history');
         $data->save();
 
         session()->put('Track', $data->trx);
 
-        $notify[] = ['success', 'Deposit request created successfully'];
-        return redirect()->route('user.deposit.confirm')->withNotify($notify);
+        // Skip local Payment Preview page and go directly to AlpPay hosted payment page
+        return redirect()->route('user.deposit.alppay.create', ['deposit_trx' => $data->trx]);
     }
 
     public function depositConfirm()
@@ -121,7 +177,7 @@ class DepositController extends Controller
         }
 
         $quantity = $request->quantity;
-        $totalAmount = $plan->retail_price * $quantity;
+        $totalAmount = planCustomerPrice($plan) * $quantity;
 
         // Проверяем баланс пользователя
         if ($user->balance < $totalAmount) {
@@ -146,6 +202,7 @@ class DepositController extends Controller
         // Создаем транзакцию
         $transaction = new Transaction();
         $transaction->user_id = $user->id;
+        $transaction->order_id = $order->id;
         $transaction->amount = $totalAmount;
         $transaction->post_balance = $user->balance;
         $transaction->charge = 0;
@@ -173,31 +230,5 @@ class DepositController extends Controller
 
         $notify[] = ['success', 'eSIM purchased successfully with balance'];
         return redirect()->route('user.esim.active')->withNotify($notify);
-    }
-
-    // Обновление баланса после успешного депозита
-    public static function userDataUpdate($deposit, $isManual = false)
-    {
-        if ($deposit->status == Status::PAYMENT_SUCCESS && $deposit->order_id == 0) {
-            $user = User::find($deposit->user_id);
-            $user->balance += $deposit->amount;
-            $user->save();
-
-            $transaction = new Transaction();
-            $transaction->user_id = $deposit->user_id;
-            $transaction->amount = $deposit->amount;
-            $transaction->post_balance = $user->balance;
-            $transaction->charge = $deposit->charge;
-            $transaction->trx_type = '+';
-            $transaction->details = 'Deposit by Card';
-            $transaction->trx = $deposit->trx;
-            $transaction->remark = 'deposit';
-            $transaction->save();
-
-            if ($isManual) {
-                $notify[] = ['success', 'Deposit approved successfully'];
-                return back()->withNotify($notify);
-            }
-        }
     }
 }

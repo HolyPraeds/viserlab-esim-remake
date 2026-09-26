@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supporting Documentation: Website Development & Technical Support / IT</title>
+  <style>
+    body { font-family: Calibri, 'Segoe UI', sans-serif; max-width: 800px; margin: 2em auto; padding: 0 1.5em; line-height: 1.5; color: #222; }
+    h1 { font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; }
+    h2 { font-size: 1.25em; margin-top: 1.2em; }
+    h3 { font-size: 1.1em; margin-top: 1em; }
+    p { margin: 0.6em 0; }
+    ul { margin: 0.4em 0; padding-left: 1.5em; }
+    li { margin: 0.2em 0; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #333; padding: 0.4em 0.6em; text-align: left; }
+    th { background: #f0f0f0; font-weight: bold; }
+    hr { border: none; border-top: 1px solid #ccc; margin: 1.5em 0; }
+    .meta { color: #555; font-size: 0.95em; margin-bottom: 1.5em; }
+    em { font-style: italic; }
+    strong { font-weight: bold; }
+    @media print { body { max-width: none; } }
+  </style>
+</head>
+<body>
+
+<h1>Supporting Documentation: Website Development & Technical Support / IT</h1>
+
+<p class="meta"><strong>Purpose:</strong> Supporting documentation for acquirer onboarding (website development and technical support & IT).</p>
+<p class="meta"><strong>Version:</strong> 1.0<br><strong>Last updated:</strong> February 2026</p>
+
+<hr>
+
+<h2>1. Website development</h2>
+
+<h3>1.1 Purpose and scope of the website</h3>
+<p>The website is an e-commerce platform for selling eSIM data plans. Users can:</p>
+<ul>
+  <li>Browse data plans by country or region, view pricing and details.</li>
+  <li>Purchase eSIMs as guests or registered users.</li>
+  <li>Pay via the integrated payment gateway (card and other methods as configured).</li>
+  <li>After payment, receive eSIM activation details (QR code and instructions).</li>
+  <li>Top up account balance (deposits) for registered users.</li>
+  <li>Contact support via contact form or support tickets (registered users).</li>
+  <li>View policy pages (Privacy, Terms, Refund, Cookies, etc.).</li>
+</ul>
+<p>Administrators manage orders, users, payment gateways, content, and support tickets through a separate admin area.</p>
+
+<h3>1.2 Technology used</h3>
+<ul>
+  <li><strong>Backend:</strong> PHP 8.3, Laravel 11 (MVC framework).</li>
+  <li><strong>Frontend:</strong> Server-rendered Blade templates, responsive layout; CSS and JavaScript for UI (carousels, lightbox, counters, viewport utilities).</li>
+  <li><strong>Database:</strong> Relational database (MySQL in production); all business data (users, orders, plans, gateways, tickets) stored there.</li>
+  <li><strong>Authentication:</strong> Session-based for web users; API tokens (Laravel Sanctum) for programmatic access where used.</li>
+  <li><strong>Payments:</strong> Integration with payment gateway (acquirer). Card data is not entered or stored on our servers; payment is collected on the gateway's page or via secure redirect. Our system only stores order references, amounts, and statuses.</li>
+  <li><strong>Email:</strong> Configurable SMTP or API-based mail service for transactional emails (order confirmation, support, etc.).</li>
+  <li><strong>Hosting:</strong> Web server (e.g. Apache/Nginx with PHP); production runs in a controlled environment with HTTPS.</li>
+</ul>
+
+<h3>1.3 Architecture (high level)</h3>
+<ul>
+  <li><strong>Public site:</strong> Home page, country/region plan listings, search, destination pages, about/contact, policy pages, language switching. Served by the main web application.</li>
+  <li><strong>User area:</strong> Registration and login; purchase flow (plan selection → checkout → redirect to payment → return/success); order history and tracking; deposits; support tickets. All behind authentication where required.</li>
+  <li><strong>Payment flow:</strong> User selects plan and proceeds to pay → application creates an order and sends the user to the payment gateway → user completes payment on the gateway → gateway sends a server-to-server notification (webhook/callback) and/or redirects user back → application updates order status and, on success, delivers eSIM details (e.g. on success page or by email).</li>
+  <li><strong>Admin area:</strong> Separate entry point and routes; access restricted to staff. Used for orders, users, gateway configuration, content, and support ticket replies.</li>
+  <li><strong>API:</strong> Read-only HTTP API for countries, regions, plans, and currency rates; used for integration or front-end features. No payment or sensitive data exposed.</li>
+  <li><strong>eSIM provider (eSIM Access):</strong> After payment success, the application automatically orders the eSIM profile from eSIM Access using the configured API key. Webhooks from eSIM Access (order status, data usage, etc.) are received at a dedicated endpoint; this URL is configured in the eSIM Access partner console.</li>
+</ul>
+
+<h3>1.4 Development and maintenance</h3>
+<ul>
+  <li>Application code is kept under version control. Changes are tested before release.</li>
+  <li>Configuration (database, URLs, gateway keys, mail, etc.) is stored in environment variables; production uses production-specific values and has debug mode disabled.</li>
+  <li>Deployment: updated code and assets are deployed to the server; database schema changes are applied via migrations; application and config caches are cleared so changes take effect.</li>
+  <li>Dependencies are managed with a standard PHP dependency manager; front-end libraries are included or loaded in a controlled way. No card data or gateway secrets are stored in the codebase.</li>
+</ul>
+
+<h3>1.5 Security (development and operation)</h3>
+<ul>
+  <li>All forms are protected against cross-site request forgery (CSRF).</li>
+  <li>User input is validated and escaped to prevent injection and XSS.</li>
+  <li>Passwords are hashed with a secure algorithm and not stored in plain text.</li>
+  <li>Sensitive configuration (database credentials, API keys, gateway credentials) is kept in environment configuration and not committed to version control.</li>
+  <li>Production runs with debug mode off so that technical details are not exposed to users.</li>
+  <li>HTTPS is used in production for the entire site, including payment and login pages.</li>
+  <li>Card data is never stored or processed on our servers; it is handled only by the payment gateway.</li>
+</ul>
+
+<hr>
+
+<h2>2. Technical support and IT</h2>
+
+<h3>2.1 Support channels</h3>
+<ul>
+  <li><strong>Contact form:</strong> Available on the website. Submissions are processed by the application (e.g. sent to support email or stored for handling). Used for general enquiries.</li>
+  <li><strong>Support tickets:</strong> Logged-in users can open tickets, attach files, view replies, and close tickets. Staff reply and update status via the admin interface. Used for order and account issues.</li>
+  <li><strong>Email:</strong> A dedicated support email address is used for correspondence; sending is configured in the application. Used for replies to contact form, tickets, and direct user emails.</li>
+</ul>
+
+<h3>2.2 Handling user requests and incidents</h3>
+<ul>
+  <li><strong>Support tickets:</strong> Each ticket is stored in the database with status (e.g. open, replied, closed). Staff view and reply from the admin panel; users see the thread in their account. Target response times are defined internally (SLA).</li>
+  <li><strong>Contact form:</strong> Messages are received and processed by the backend; they are either forwarded to support email or stored and handled from the admin side. Responses follow the same support process.</li>
+  <li><strong>Payment and order issues:</strong> Investigated using order ID, transaction reference from the gateway, and gateway status. Resolution (refund, resend eSIM, etc.) is done in line with the published refund and support policies. Disputes or chargebacks are handled with the acquirer according to their process.</li>
+</ul>
+
+<h3>2.3 IT and infrastructure</h3>
+<ul>
+  <li><strong>Hosting:</strong> The website and database are hosted on a managed or VPS environment. Provider, location, and SLA are defined per environment.</li>
+  <li><strong>Database:</strong> Production uses a relational database (MySQL). Backups and retention follow the hosting provider's and/or internal procedures. Access to the database is restricted to authorised IT/admin personnel.</li>
+  <li><strong>Logs:</strong> The application writes logs (errors, important events). Logs are stored on the server and retained according to internal policy. They are used for troubleshooting and incident analysis.</li>
+  <li><strong>Monitoring:</strong> Server and application availability and errors can be monitored (e.g. uptime checks, log-based alerts). Responsibility and tools are assigned internally.</li>
+</ul>
+
+<h3>2.4 Access control and responsibilities</h3>
+<ul>
+  <li><strong>Code and deployment:</strong> Only authorised developers/IT have access to the codebase and deployment process.</li>
+  <li><strong>Admin panel:</strong> Access to the Laravel admin (orders, users, gateways, content, tickets) is restricted to authorised staff. Credentials are managed securely; two-factor authentication is used if configured.</li>
+  <li><strong>Servers and database:</strong> Access to servers and direct database access are limited to IT/administrators under the principle of least privilege.</li>
+</ul>
+
+<h3>2.5 Change and incident management</h3>
+<ul>
+  <li><strong>Changes:</strong> Code and configuration changes are deployed in a controlled way. Changes that affect payment or gateway integration are reviewed before production deployment.</li>
+  <li><strong>Incidents:</strong> Malfunctions (e.g. site down, payment errors) are prioritised, handled by IT/support, and escalated according to internal rules. Significant incidents can be reviewed afterwards to improve processes.</li>
+</ul>
+
+<h3>2.6 Policies and compliance</h3>
+<ul>
+  <li>The site publishes Privacy Policy, Terms of Service, Refund Policy, and Cookie Policy. Links are provided in the footer and, where required, on registration or checkout.</li>
+  <li>This document describes how the website is developed and how technical support and IT are organised, for submission to the acquirer as supporting documentation.</li>
+</ul>
+
+<hr>
+
+<h2>3. Payment architecture &amp; data security (for acquirer)</h2>
+<p><em>This section is intended for the acquirer / compliance department. It describes the payment integration, PCI DSS scope, and measures taken to comply with PSD2 and card scheme requirements.</em></p>
+
+<h3>3.1 Integration method: Hosted Payment Page (HPP)</h3>
+<p>We use a <strong>Hosted Payment Page (HPP)</strong> integration. The customer remains on our website until checkout; they are then redirected to the acquirer's/gateway's secure page to enter payment details and complete the transaction, and are redirected back to our site for the outcome.</p>
+<ul>
+  <li><strong>Cardholder data:</strong> No PAN, CVV, or expiry date is ever transmitted to or stored on our infrastructure. All card data entry and processing takes place on the acquirer's/gateway's PCI-DSS compliant environment.</li>
+  <li><strong>PCI DSS scope:</strong> Our platform is <strong>out of scope</strong> for sensitive cardholder data. We qualify for <strong>PCI DSS SAQ A</strong> (or equivalent, as determined by the acquirer) for this integration type.</li>
+</ul>
+
+<h3>3.2 Technical payment flow (step-by-step)</h3>
+<ol>
+  <li><strong>Checkout:</strong> The customer selects products (eSIM plans) and proceeds to the checkout/payment page on our server (<code>https://travelsim.live</code>).</li>
+  <li><strong>Order creation:</strong> Our server creates an order and a payment session in our database (order reference, amount, currency, customer identifier).</li>
+  <li><strong>Payment initiation:</strong> Our server sends a server-to-server API request to the payment gateway (using API credentials) to create a payment session. We send: amount, currency, order reference, return URL, webhook URL, and customer data (e.g. email, name, locale). We do <strong>not</strong> send any card data.</li>
+  <li><strong>Redirection:</strong> The gateway returns a secure URL of the hosted payment page. Our server redirects the customer to that URL. All payment data entry (card details, 3D Secure, etc.) occurs <strong>only</strong> on the gateway's servers.</li>
+  <li><strong>Customer authentication:</strong> The customer enters card data on the gateway's page. The gateway performs Strong Customer Authentication (SCA) as required (e.g. 3D Secure 2.0 challenge). Our servers do not participate in this step.</li>
+  <li><strong>Return:</strong> After the transaction, the gateway redirects the customer back to our return URL (success or failure/cancel). We use this redirect only to show the appropriate outcome page; we do <strong>not</strong> rely on it alone to finalise the order.</li>
+  <li><strong>Confirmation:</strong> Our server receives an asynchronous <strong>webhook</strong> (server-to-server notification) from the gateway with the final transaction status. We treat the webhook as the authoritative source for updating the order (completed or failed). Only after a successful webhook do we deliver the product (eSIM) and send order confirmation email.</li>
+</ol>
+
+<h3>3.3 Strong Customer Authentication (SCA) / PSD2</h3>
+<ul>
+  <li><strong>3D Secure:</strong> Our integration uses the gateway's Hosted Payment Page. All 3D Secure (3DS 2.0) flows—including challenge (e.g. SMS/push)—are handled by the gateway. We do not capture or process authentication responses; we only receive the final payment result via webhook and redirect.</li>
+  <li><strong>Confirmation to acquirer:</strong> We confirm that we use the gateway's HPP and that SCA/3DS is applied by the gateway as per PSD2. We do not bypass or disable SCA for card payments.</li>
+  <li><strong>Exemptions:</strong> If we use any low-value or other exemptions (e.g. transactions below a threshold), we will ensure that such transactions are clearly indicated in the API request as per the gateway's specification. Currently we do not rely on exemptions for the main flow.</li>
+</ul>
+
+<h3>3.4 Merchant / descriptor data (Mandate 2026/2027)</h3>
+<ul>
+  <li><strong>DBA (Doing Business As) name:</strong> The trading name shown to the cardholder (e.g. on bank statement) is the one we configure in the gateway's back office and/or pass in the API when supported. We ensure it is recognisable and consistent with our brand and contract with the acquirer.</li>
+  <li><strong>Support contact in payment request:</strong> Where the gateway's API supports it, we pass our <strong>support contact</strong> (email and/or phone) in the payment session so that it can appear on the electronic receipt/statement. These details are the same as those published on our website and used for customer support.</li>
+</ul>
+
+<h3>3.5 Webhooks and status synchronisation</h3>
+<ul>
+  <li><strong>Webhook endpoint:</strong> We expose a dedicated HTTPS endpoint that receives server-to-server notifications from the gateway (e.g. payment completed, declined, cancelled).</li>
+  <li><strong>Signature verification:</strong> Every incoming webhook request is verified using the gateway's signature mechanism (e.g. HMAC-SHA256 over the raw body). If the signature does not match, we respond with an error and do <strong>not</strong> update the order. This prevents forged "success" notifications.</li>
+  <li><strong>Idempotency:</strong> We process webhooks in an idempotent way. For a given payment (identified by gateway payment ID and/or our order reference), we update the order status only from "pending"/"initiated" to "completed" or "failed" once. Repeated webhooks for the same payment do <strong>not</strong> result in double delivery of the product or double crediting of the user balance.</li>
+  <li><strong>Authoritative source:</strong> The final order status is set from the webhook result, not from the customer's browser or redirect URL parameters.</li>
+</ul>
+
+<h3>3.6 Order summary / basket (Card Scheme requirements)</h3>
+<ul>
+  <li><strong>Data sent to gateway:</strong> When creating the payment session we send at least: order reference, total amount, currency, and a short description (e.g. "eSIM Order #12345"). If the gateway's API supports an <strong>items</strong> array (product name, quantity, unit price, VAT rate, total), we pass that so the transaction is clearly identifiable on the cardholder's statement.</li>
+  <li><strong>Currency:</strong> The payment currency (e.g. EUR) is set per order and sent to the gateway. It matches the currency of our contract with the acquirer and the prices displayed to the customer.</li>
+  <li><strong>Transparency:</strong> We ensure that the description and/or line items sent to the gateway allow the cardholder to recognise the purchase on their statement, in line with applicable card scheme and mandate requirements (e.g. 2026/2027).</li>
+</ul>
+
+<h3>3.7 Security measures</h3>
+<ul>
+  <li><strong>API credentials:</strong> Gateway API keys and signing secrets are stored only in environment variables (or secure configuration), never in source code or version control.</li>
+  <li><strong>TLS:</strong> All communication between our server, the customer's browser, and the payment gateway uses <strong>TLS 1.2 or higher</strong>. We do not use SSL 3.0 or TLS 1.0 for payment or login.</li>
+  <li><strong>IP (if required):</strong> If the acquirer requires IP whitelisting, our server calls the gateway API from a known static IP, which we can provide upon request.</li>
+</ul>
+
+<h3>3.8 Go-live checklist (frontend and operations)</h3>
+<ul>
+  <li><strong>Payment page:</strong> The checkout page clearly indicates that the customer will be redirected to a secure payment page to enter card details. We do not collect card data on our own pages.</li>
+  <li><strong>Logos:</strong> Where required by the acquirer or card schemes, we display the relevant logos (e.g. Visa, Mastercard, Maestro, acquirer logo) in the footer or on the checkout/payment selection page.</li>
+  <li><strong>Order confirmation:</strong> After we receive a successful webhook, we send the customer an <strong>email confirmation</strong> with order details (order number, amount, product summary). We do not send card data or full card numbers in any email.</li>
+  <li><strong>Policies:</strong> Terms of Service and Refund Policy are published on our site and linked from the footer and/or checkout. We provide the direct URLs to the acquirer when requested for production activation.</li>
+</ul>
+
+<hr>
+
+<h2>4. Documents and links to provide to the acquirer</h2>
+<p>When requested by the acquirer, we provide:</p>
+<ul>
+  <li><strong>PCI DSS SAQ A</strong> (or the applicable SAQ): completed self-assessment questionnaire.</li>
+  <li><strong>Network / ASV scan report:</strong> if required by the acquirer (e.g. for higher volumes), we provide a vulnerability scan report from an Approved Scanning Vendor (ASV), including the list of scanned URLs and IPs.</li>
+  <li><strong>Terms of Service URL:</strong> direct link to the Terms of Service page.</li>
+  <li><strong>Refund Policy URL:</strong> direct link to the Refund Policy page.</li>
+  <li><strong>Privacy Policy URL:</strong> direct link to the Privacy Policy page (for reference).</li>
+</ul>
+
+<hr>
+
+<h2>5. Summary</h2>
+<ul>
+  <li><strong>Website:</strong> E-commerce platform for eSIM sales; Laravel (PHP 8.3), MySQL, Blade frontend; payment via external gateway with no card data on our systems; public site, user area (orders, deposits, tickets), admin area, and read-only API.</li>
+  <li><strong>Development:</strong> Version-controlled code, environment-based configuration, structured deployment and migrations, and security measures (CSRF, validation, hashing, HTTPS, no storage of card data).</li>
+  <li><strong>Support and IT:</strong> Contact form, support tickets, and email; tickets and orders managed in the application; IT responsible for hosting, backups, logs, access control, and change/incident management; policies published on the site.</li>
+  <li><strong>Payments (for acquirer):</strong> Hosted Payment Page (HPP); no card data on our infrastructure; PCI DSS SAQ A scope; SCA/3DS handled by gateway; webhook signature verification and idempotent processing; merchant/support data and order summary as per gateway API; TLS 1.2+; order confirmation email after webhook success.</li>
+</ul>
+
+<hr>
+
+<h2>6. Authorized representative</h2>
+<table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Company name</strong></td><td>BROOKBURN INTERNATIONAL LTD</td></tr>
+  <tr><td><strong>Website</strong></td><td>https://travelsim.live</td></tr>
+  <tr><td><strong>Registration number</strong></td><td>14153895</td></tr>
+  <tr><td><strong>Country of registration</strong></td><td>United Kingdom (UK)</td></tr>
+  <tr><td><strong>Authorized representative</strong></td><td>[Name]</td></tr>
+  <tr><td><strong>Title</strong></td><td>[e.g. CTO / Head of IT]</td></tr>
+  <tr><td><strong>Date</strong></td><td>February 2026</td></tr>
+</table>
+
+<hr>
+<p><em>This document is submitted as supporting documentation for website development, technical support / IT, and payment architecture for acquirer onboarding. Complete the authorized representative name and title in section 6 before signing.</em></p>
+
+</body>
+</html>

@@ -28,7 +28,7 @@ Route::get('nmi', 'NMI\ProcessController@ipn')->name('NMI');
 Route::any('btc-pay', 'BTCPay\ProcessController@ipn')->name('BTCPay');
 Route::post('now-payments-hosted', 'NowPaymentsHosted\ProcessController@ipn')->name('NowPaymentsHosted');
 Route::post('taurixy', 'Taurixy\ProcessController@ipn')->name('Taurixy');
-// Route::post('esimaccess', 'IPN\EsimAccessController@ipn')->name('esimaccess'); // Disabled - controller not found
+Route::any('esimaccess', [\App\Http\Controllers\IPN\EsimAccessController::class, 'ipn'])->name('esimaccess');
 Route::post('now-payments-checkout', 'NowPaymentsCheckout\ProcessController@ipn')->name('NowPaymentsCheckout');
 Route::post('2checkout', 'TwoCheckout\ProcessController@ipn')->name('TwoCheckout');
 Route::any('checkout', 'Checkout\ProcessController@ipn')->name('Checkout');

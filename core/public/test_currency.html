@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест переключения валюты</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .currency-btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: 2px solid #ccc; background: #f0f0f0; }
+        .currency-btn.active { background: #007bff; color: white; border-color: #007bff; }
+        .price { font-size: 24px; font-weight: bold; margin: 20px 0; }
+        .test-item { padding: 10px; margin: 10px 0; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Тест переключения валюты</h1>
+    
+    <div>
+        <button class="currency-btn active" data-currency="EUR">EUR</button>
+        <button class="currency-btn" data-currency="GBP">GBP</button>
+    </div>
+    
+    <div class="price" data-base-amount="100">100 EUR</div>
+    
+    <div class="test-item">
+        <div>План 1: <span class="price-item" data-base-amount="50">50 EUR</span></div>
+        <div>План 2: <span class="price-item" data-base-amount="75">75 EUR</span></div>
+        <div>План 3: <span class="price-item" data-base-amount="100">100 EUR</span></div>
+    </div>
+    
+    <div id="status"></div>
+    
+    <script>
+        let currentCurrency = localStorage.getItem('site_currency') || 'EUR';
+        let baseCurrency = 'EUR';
+        let currencyRates = {};
+        
+        // Загружаем курсы
+        function loadRates() {
+            $.ajax({
+                url: '/api/currency/rates',
+                method: 'GET',
+                success: function(response) {
+                    if (response.status === 'success' && response.rates) {
+                        currencyRates = response.rates;
+                        currencyRates[baseCurrency] = { code: baseCurrency, rate: 1.0 };
+                        $('#status').html('✅ Курсы загружены: ' + JSON.stringify(currencyRates));
+                        updatePrices();
+                    }
+                },
+                error: function(xhr) {
+                    $('#status').html('❌ Ошибка загрузки курсов: ' + xhr.status + ' ' + xhr.statusText);
+                    console.error('Error:', xhr);
+                }
+            });
+        }
+        
+        // Конвертация
+        function convertPrice(amount, fromCurrency, toCurrency) {
+            if (fromCurrency === toCurrency) return parseFloat(amount);
+            
+            if (fromCurrency === baseCurrency) {
+                const rate = currencyRates[toCurrency]?.rate || 1.0;
+                return parseFloat(amount) * rate;
+            }
+            
+            if (toCurrency === baseCurrency) {
+                const rate = currencyRates[fromCurrency]?.rate || 1.0;
+                return parseFloat(amount) / rate;
+            }
+            
+            const fromRate = currencyRates[fromCurrency]?.rate || 1.0;
+            const toRate = currencyRates[toCurrency]?.rate || 1.0;
+            return (parseFloat(amount) / fromRate) * toRate;
+        }
+        
+        // Обновление цен
+        function updatePrices() {
+            $('[data-base-amount]').each(function() {
+                const baseAmount = parseFloat($(this).data('base-amount'));
+                const converted = convertPrice(baseAmount, baseCurrency, currentCurrency);
+                $(this).text(parseFloat(converted).toFixed(2) + ' ' + currentCurrency);
+            });
+        }
+        
+        // Обработчик клика
+        $('.currency-btn').on('click', function() {
+            const selected = $(this).data('currency');
+            if (selected === currentCurrency) return;
+            
+            currentCurrency = selected;
+            localStorage.setItem('site_currency', currentCurrency);
+            
+            $('.currency-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            updatePrices();
+        });
+        
+        // Инициализация
+        $(document).ready(function() {
+            $('.currency-btn[data-currency="' + currentCurrency + '"]').addClass('active');
+            loadRates();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

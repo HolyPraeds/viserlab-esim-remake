@@ -30,8 +30,12 @@ class Esim extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function scopeActive($query){
-        return $query->whereDate('expiry_date', '>=', now());
+    /** Active = not yet expired. Include null expiry so eSIM always shows until we have a date. */
+    public function scopeActive($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', now());
+        });
     }
 
     public function scopeExpired($query){

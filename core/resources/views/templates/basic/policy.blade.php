@@ -31,6 +31,7 @@
     (function(){
         const blocks = document.querySelectorAll('.policy-autoformat');
         blocks.forEach(block => {
+            if (block.querySelector('.policy-no-autoformat')) return;
             const raw = block.textContent || '';
             if(!raw.trim()) return;
             const lines = raw.replace(/\r\n/g, '\n').split('\n');

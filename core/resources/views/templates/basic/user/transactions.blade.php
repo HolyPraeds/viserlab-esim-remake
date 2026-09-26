@@ -64,12 +64,12 @@
 
                                     <td>
                                         <span class="fw-bold @if ($trx->trx_type == '+') text--success @else text--danger @endif">
-                                            {{ $trx->trx_type }} {{ showAmount($trx->amount) }}
+                                            {{ $trx->trx_type }} {{ showAmount($trx->amount, 2, true, false, true, true) }}
                                         </span>
                                     </td>
 
                                     <td>
-                                        {{ showAmount($trx->post_balance) }}
+                                        {{ showAmount($trx->post_balance, 2, true, false, true, true) }}
                                     </td>
 
 

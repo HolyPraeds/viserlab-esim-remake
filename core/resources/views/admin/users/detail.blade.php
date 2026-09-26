@@ -6,7 +6,7 @@
             <div class="row gy-4">
 
                 <div class="col-xxl-3 col-sm-6">
-                    <x-widget style="7" link="{{ route('admin.report.transaction', $user->id) }}" title="Balance" icon="las la-money-bill-wave-alt" value="{{ showAmount($user->balance) }}" bg="indigo" type="2" />
+                    <x-widget style="7" link="{{ route('admin.report.transaction', $user->id) }}" title="Balance" icon="las la-money-bill-wave-alt" value="{{ showAmount($user->balance, 2, true, false, true, true) }}" bg="indigo" type="2" />
                 </div>
 
                 <div class="col-xxl-3 col-sm-6">

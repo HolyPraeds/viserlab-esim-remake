@@ -37,7 +37,7 @@
                                 </td>
                                 <td>
                                     <span class="fw-bold">
-                                        {{ showAmount($user->balance) }}
+                                        {{ showAmount($user->balance, 2, true, false, true, true) }}
                                     </span>
                                 </td>
                                 <td>
