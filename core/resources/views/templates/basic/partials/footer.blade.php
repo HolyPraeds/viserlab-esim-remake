@@ -32,6 +32,8 @@
                         <p class="footer-item__desc">TravelSim is a leading provider of eSIM services, offering seamless and hassle-free connectivity for travelers, digital nomads, and businesses worldwide. With our innovative eSIM technology, you can enjoy instant activation and coverage in multiple countries.</p>
                         <ul class="social-list">
                             @foreach ($footerIcons as $footerIcon)
+                                @php $iconUrl = strtolower((string) ($footerIcon->data_values->url ?? '')); @endphp
+                                @continue(str_contains($iconUrl, 'instagram.com'))
                                 <li class="social-list__item">
                                     <a href="{{ $footerIcon->data_values->url }}" class="social-list__link flex-center" target="_blank">
                                         @php
@@ -40,6 +42,11 @@
                                     </a>
                                 </li>
                             @endforeach
+                            <li class="social-list__item">
+                                <a href="https://www.instagram.com/travel_sim_live/" class="social-list__link flex-center" target="_blank" rel="noopener noreferrer">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            </li>
                             <li class="social-list__item">
                                 <a href="https://www.facebook.com/profile.php?id=61580776751642" class="social-list__link flex-center" target="_blank" rel="noopener noreferrer">
                                     <i class="fab fa-facebook-f"></i>
@@ -145,7 +152,7 @@
    
 
     <span role="img" aria-label="3D Secure" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
-        <img src="{{ asset('assets/images/logo_icon/3ds_visa_master.jpg') }}" alt="3D Secure" style="height: 30px; width: auto;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_Secure.svg" alt="3D Secure / Visa Secure" style="height: 24px; width: auto;" loading="lazy">
     </span>
 
 </div>
