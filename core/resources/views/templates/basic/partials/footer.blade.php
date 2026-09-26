@@ -152,7 +152,7 @@
    
 
     <span role="img" aria-label="3D Secure" style="background:white; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
-        <img src="{{ asset('assets/images/logo_icon/3ds-secure.svg') }}" alt="3D Secure" style="height: 30px; width: auto;" loading="lazy">
+        <img src="{{ asset('assets/images/logo_icon/3ds_visa_master.jpg') }}" alt="3D Secure" style="height: 30px; width: auto;" loading="lazy">
     </span>
 
 </div>
