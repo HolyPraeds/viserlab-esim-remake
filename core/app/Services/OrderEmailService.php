@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Deposit;
 use App\Models\Esim;
 use App\Models\Order;
+use App\Support\BrandContext;
 use Illuminate\Support\Facades\Log;
 
 class OrderEmailService
@@ -103,6 +104,7 @@ class OrderEmailService
             ];
         }
 
+        return BrandContext::using($order->brand, function () use ($order, $esim, $recipients, $trx) {
         $dashboardUrl = route('user.esim.active');
         $expiryFormatted = $esim->expiry_date ? showDateTime($esim->expiry_date, 'd M Y, h:i A') : '—';
         $qrCodeUrl = (str_starts_with($esim->qr_code ?? '', 'http')) ? stripPngFromUrl($esim->qr_code) : '';
@@ -141,6 +143,7 @@ class OrderEmailService
         }
 
         return ['sent' => $sent, 'failed' => $failed, 'error' => null];
+        });
     }
 
     public function sendOrderPlaced(Order $order, ?string $extraEmail = null): array
@@ -148,6 +151,9 @@ class OrderEmailService
         $order->loadMissing(['user', 'orderItem.plan']);
         $planName = $order->orderItem?->plan?->name ? __($order->orderItem->plan->name) : '—';
         $recipients = $this->recipients($order, $extraEmail);
+        $adminEmail = gs('email_from', false);
+
+        return BrandContext::using($order->brand, function () use ($order, $planName, $recipients, $adminEmail) {
         $sent = [];
         $failed = [];
 
@@ -168,7 +174,6 @@ class OrderEmailService
             }
         }
 
-        $adminEmail = gs('email_from');
         if ($adminEmail) {
             try {
                 $adminRecipient = (object) [
@@ -196,5 +201,6 @@ class OrderEmailService
         $error = (!$recipients && !$adminEmail) ? 'No email address found for this order.' : null;
 
         return ['sent' => $sent, 'failed' => $failed, 'error' => $error];
+        });
     }
 }

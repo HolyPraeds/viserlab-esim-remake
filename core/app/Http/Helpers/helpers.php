@@ -16,6 +16,7 @@ use App\Models\Region;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Notify\Notify;
+use App\Support\BrandContext;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -67,18 +68,55 @@ function activeTemplateName() {
     return $template;
 }
 
+function currentBrand(?string $key = null) {
+    $brand = BrandContext::current();
+    if ($key === null) {
+        return $brand;
+    }
+
+    return $brand[$key] ?? null;
+}
+
+function brandImage(string $key, ?string $fallback = null): ?string
+{
+    $path = currentBrand('images')[$key] ?? null;
+    if (is_string($path) && $path !== '' && file_exists($path)) {
+        return asset($path);
+    }
+
+    return $fallback;
+}
+
 function siteLogo($type = null) {
     $name = $type ? "/logo_$type.png" : '/logo.png';
-    $path = getFilePath('logoIcon') . $name;
-    if (file_exists($path)) {
-        return asset($path) . '?v=' . filemtime($path);
+    $paths = [];
+    if (BrandContext::shouldOverlay()) {
+        $dir = trim((string) (currentBrand('logo_dir') ?? ''), '/');
+        if ($dir !== '') {
+            $paths[] = $dir . $name;
+        }
+    }
+    $paths[] = getFilePath('logoIcon') . $name;
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            return asset($path) . '?v=' . filemtime($path);
+        }
     }
     return asset('assets/images/default.png');
 }
 function siteFavicon() {
-    $path = getFilePath('logoIcon') . '/favicon.png';
-    if (file_exists($path)) {
-        return asset($path) . '?v=' . filemtime($path);
+    $paths = [];
+    if (BrandContext::shouldOverlay()) {
+        $dir = trim((string) (currentBrand('logo_dir') ?? ''), '/');
+        if ($dir !== '') {
+            $paths[] = $dir . '/favicon.png';
+        }
+    }
+    $paths[] = getFilePath('logoIcon') . '/favicon.png';
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            return asset($path) . '?v=' . filemtime($path);
+        }
     }
     return asset('assets/images/default.png');
 }
@@ -472,14 +510,27 @@ function dateSorting($arr) {
     return $arr;
 }
 
-function gs($key = null) {
-   
+function gs($key = null, $overlay = true) {
     $general = GeneralSetting::first();
+
+    if ($overlay && $general && BrandContext::shouldOverlay()) {
+        $brand = BrandContext::current();
+        if (!empty($brand['name'])) {
+            $general->site_name = $brand['name'];
+        }
+        if (!empty($brand['base_color'])) {
+            $general->base_color = $brand['base_color'];
+        }
+        if (!empty($brand['email_from'])) {
+            $general->email_from = $brand['email_from'];
+        }
+        $general->syncOriginal();
+    }
 
     if ($key) {
         return $general->$key ?? null;
     }
-    
+
     return $general;
 }
 

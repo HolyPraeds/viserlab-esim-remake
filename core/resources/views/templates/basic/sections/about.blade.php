@@ -36,7 +36,7 @@
             </div>
             <div class="col-md-10 col-lg-6 col-xxl-7">
                 {{-- Use frontendImage (checks file on disk). On Linux extension must match exactly: .jpg not .JPG --}}
-                <img class="about-us__thumb" src="{{ frontendImage('about', '68d1c594be8641758578068.jpg') }}" alt="about-image">
+                <img class="about-us__thumb @if(currentBrand('id') === 'travelpal') tp-section-photo @endif" src="{{ brandImage('about', frontendImage('about', '68d1c594be8641758578068.jpg')) }}" alt="{{ currentBrand('name') }}">
             </div>
         </div>
     </div>

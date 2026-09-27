@@ -4,14 +4,14 @@
 @extends($activeTemplate . 'layouts.auth')
 @section('content')
     <div class="account-section">
-        <div class="account-left bg-img" data-background-image="{{ frontendImage('login_register', $loginContent?->data_values?->image, '2055x2160') }}">
+        <div class="account-left bg-img" data-background-image="{{ brandImage('login_register', frontendImage('login_register', $loginContent?->data_values?->image, '2055x2160')) }}">
         </div>
         <div class="account-content">
             <form method="POST" action="{{ route('user.login') }}" class="account-form verify-gcaptcha">
                 @csrf
 
                 <a href="{{ route('home') }}" class="account-logo">
-                    <img class="fit-image" src="{{ siteLogo('dark') }}" alt="logo">
+                    <img class="fit-image" src="{{ siteLogo('dark') }}" alt="{{ currentBrand('name') }}">
                 </a>
 
                 <div class="account-heading">

@@ -1,8 +1,8 @@
  <header class="header" id="header">
      <div class="container">
          <nav class="navbar navbar-expand-lg">
-             <a class="navbar-brand order-1" href="{{ route('home') }}">
-                 <img src="{{ siteLogo('dark') }}" alt="logo">
+             <a class="navbar-brand order-1 {{ currentBrand('navbar_brand_class') }}" href="{{ route('home') }}">
+                 <img src="{{ siteLogo('dark') }}" alt="{{ currentBrand('name') }}" class="{{ currentBrand('logo_img_class') }}">
              </a>
 
              <button class="navbar-toggler order-3 order-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#header-collapse" aria-controls="header-collapse" aria-expanded="false"

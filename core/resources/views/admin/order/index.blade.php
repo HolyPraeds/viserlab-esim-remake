@@ -9,6 +9,7 @@
                             <thead>
                                 <tr>
                                     <th>@lang('Order No.')</th>
+                                    <th>@lang('Brand')</th>
                                     <th>@lang('User') | @lang('Username')</th>
                                     <th>@lang('Plan')</th>
                                     <th>@lang('Price')</th>
@@ -23,6 +24,9 @@
                                     <tr>
                                         <td>
                                             <span class="fw-bold">#{{ $order->order_number }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge--primary">{{ $order->brandName() }}</span>
                                         </td>
                                         <td>
                                             @php

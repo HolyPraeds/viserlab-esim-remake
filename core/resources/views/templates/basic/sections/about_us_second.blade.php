@@ -7,7 +7,7 @@
     <div class="container">
         <div class="row justify-content-center align-items-center gy-4 gy-lg-0">
             <div class="col-md-10 col-lg-6">
-                <img class="easier-section__image" src="{{ frontendImage('about_us_second', $aboutUsSecondContent?->data_values?->image, '1270x980') }}" alt="image">
+                <img class="easier-section__image @if(currentBrand('id') === 'travelpal') tp-section-photo @endif" src="{{ brandImage('about_us_second', frontendImage('about_us_second', $aboutUsSecondContent?->data_values?->image, '1270x980')) }}" alt="{{ currentBrand('name') }}">
             </div>
             <div class="col-md-10 col-lg-6">
                 <div class="section-heading style-left">

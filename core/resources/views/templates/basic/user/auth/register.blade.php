@@ -6,13 +6,13 @@
 @section('content')
     @if (gs('registration'))
         <div class="account-section">
-            <div class="account-left bg-img" data-background-image="{{ frontendImage('login_register', $content?->data_values?->image, '2055x2160') }}">
+            <div class="account-left bg-img" data-background-image="{{ brandImage('login_register', frontendImage('login_register', $content?->data_values?->image, '2055x2160')) }}">
             </div>
             <div class="account-content">
                 <form action="{{ route('user.register') }}" class="account-form lg-style verify-gcaptcha disableSubmission" method="POST">
                     @csrf
                     <a href="{{ route('home') }}" class="account-logo">
-                        <img class="fit-image" src="{{ siteLogo('dark') }}" alt="logo">
+                        <img class="fit-image" src="{{ siteLogo('dark') }}" alt="{{ currentBrand('name') }}">
                     </a>
 
                     <div class="account-heading">

@@ -26,12 +26,18 @@
     @stack('style')
 
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/color.php') }}?color={{ gs('base_color') }}">
-    
+    @foreach ((array) currentBrand('css') as $brandCss)
+        <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/' . $brandCss) }}">
+    @endforeach
+
     @php echo loadExtension('google-analytics') @endphp
 </head>
 
-<body>
+<body class="{{ currentBrand('body_class') }}">
     @stack('fbComment')
+    @if (currentBrand('id') === 'payersim')
+        @include($activeTemplate . 'partials.calm_brand_strip')
+    @endif
 
     <!--==================== Preloader Start ====================-->
     <div class="preloader">

@@ -1,0 +1,420 @@
+/**
+ * Orbit theme — dark, cyan accent, Syne + DM Mono
+ * Apply when body has class .theme-orbit
+ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+/* Hide Orbit-only blocks when theme is off */
+body:not(.theme-orbit) .orbit-stats { display: none !important; }
+
+body.theme-orbit {
+  font-family: 'DM Mono', 'Courier New', monospace !important;
+  background: #050810 !important;
+  color: #e8eaf0 !important;
+  min-height: 100vh;
+}
+
+.theme-orbit .page-wrapper { background: #050810 !important; }
+
+/* ---- Variables ---- */
+.theme-orbit {
+  --orbit-bg: #050810;
+  --orbit-text: #e8eaf0;
+  --orbit-muted: rgba(232, 234, 240, 0.5);
+  --orbit-accent: #00d2ff;
+  --orbit-accent-dim: rgba(0, 210, 255, 0.15);
+  --orbit-border: rgba(255, 255, 255, 0.07);
+  --orbit-card-bg: rgba(255, 255, 255, 0.03);
+}
+
+/* ---- Header ---- */
+.theme-orbit .header,
+.theme-orbit .header.fixed-header,
+.theme-orbit .header.add-bg {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(5, 8, 16, 0.85) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: none !important;
+}
+
+.theme-orbit .header .nav-menu .nav-item .nav-link {
+  color: rgba(232, 234, 240, 0.5) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.08em;
+  font-family: 'DM Mono', monospace !important;
+}
+
+.theme-orbit .header .nav-menu .nav-item .nav-link::before {
+  background: var(--orbit-accent) !important;
+}
+
+.theme-orbit .header .nav-menu .nav-item:hover .nav-link,
+.theme-orbit .header .nav-menu .nav-item.active .nav-link {
+  color: var(--orbit-accent) !important;
+}
+
+.theme-orbit .header .navbar-toggler { color: #e8eaf0 !important; }
+
+/* Logo area — keep logo, optional text override in partial if needed */
+.theme-orbit .header .navbar-brand img { filter: brightness(1.1); }
+
+/* Auth / currency area */
+.theme-orbit .navbar-auth-area .btn-currency,
+.theme-orbit .navbar-auth-area .btn--base {
+  background: linear-gradient(135deg, #00d2ff, #0099cc) !important;
+  color: #050810 !important;
+  border: none !important;
+  padding: 8px 20px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  border-radius: 2px !important;
+  font-family: 'DM Mono', monospace !important;
+}
+
+.theme-orbit .navbar-auth-area .btn-currency:hover,
+.theme-orbit .navbar-auth-area .btn--base:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(0, 210, 255, 0.4);
+}
+
+/* Main content offset under fixed header */
+.theme-orbit main.page-wrapper { padding-top: 0; }
+
+@media (max-width: 991px) {
+  .theme-orbit main.page-wrapper { margin-top: 65px !important; }
+}
+
+/* ---- Banner (Hero) ---- */
+.theme-orbit .banner-section {
+  min-height: 0;
+  padding: clamp(72px, 12vw, 104px) 0 clamp(36px, 5vw, 56px) !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-orbit .banner-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 210, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 210, 255, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.theme-orbit .banner-section .container { position: relative; z-index: 2; }
+
+.theme-orbit .banner-content__title {
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: clamp(48px, 5vw, 72px) !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.05 !important;
+  color: #e8eaf0 !important;
+}
+
+.theme-orbit .banner-content__title .gradient-text,
+.theme-orbit .banner-content__title span[style*="gradient"] {
+  background: linear-gradient(90deg, #00d2ff, #0066ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-orbit .banner-content__desc {
+  color: var(--orbit-muted) !important;
+  font-size: 15px !important;
+  font-weight: 300 !important;
+  max-width: 420px;
+  line-height: 1.7;
+}
+
+/* Search box Orbit style */
+.theme-orbit .banner-section .search-box { max-width: 100%; }
+
+.theme-orbit .search-box-field {
+  display: flex !important;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.theme-orbit .search-box-field__input {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  color: #e8eaf0 !important;
+  padding: 14px 20px !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: 13px !important;
+  letter-spacing: 0.05em;
+}
+
+.theme-orbit .search-box-field__input::placeholder {
+  color: rgba(232, 234, 240, 0.35);
+}
+
+.theme-orbit .search-box-field__icon {
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #00d2ff, #0099cc);
+  color: #050810;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-orbit .search-box-field__icon svg { stroke: #050810; }
+
+.theme-orbit .search-box-result {
+  background: rgba(5, 8, 16, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 2px !important;
+  border-top: none !important;
+}
+
+/* Banner image — optional glow or hide on dark */
+.theme-orbit .banner-image {
+  border-radius: 8px;
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  box-shadow: 0 0 40px rgba(0, 210, 255, 0.1);
+}
+
+/* ---- Sections background ---- */
+.theme-orbit .coverage-area,
+.theme-orbit .destination,
+.theme-orbit .choose-plan,
+.theme-orbit .breadcrumb,
+.theme-orbit .footer-area,
+.theme-orbit .service-section,
+.theme-orbit .testimonial-section .testimonial-slider,
+.theme-orbit .blog-section__content {
+  background-color: #050810 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ---- Stats ticker (if .orbit-stats present) ---- */
+.theme-orbit .orbit-stats {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px 0;
+  overflow: hidden;
+}
+
+.theme-orbit .orbit-stats__inner {
+  display: flex;
+  animation: orbit-ticker 20s linear infinite;
+  width: max-content;
+}
+
+.theme-orbit .orbit-stats__item {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding: 0 48px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+
+.theme-orbit .orbit-stats__value {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #00d2ff;
+}
+
+.theme-orbit .orbit-stats__label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(232, 234, 240, 0.35);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@keyframes orbit-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---- Coverage / Plans section headings ---- */
+.theme-orbit .coverage-area .section-heading .section-heading__title,
+.theme-orbit .destination .section-heading .section-heading__title,
+.theme-orbit .section-heading__title {
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 800 !important;
+  color: #e8eaf0 !important;
+}
+
+.theme-orbit .section-heading__subtitle,
+.theme-orbit .section-heading .section-heading__subtitle {
+  color: rgba(232, 234, 240, 0.4) !important;
+  font-family: 'DM Mono', monospace !important;
+  letter-spacing: 0.08em;
+}
+
+/* Tab buttons Orbit style */
+.theme-orbit .esim-plan-tab {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.theme-orbit .esim-plan-tab__btn {
+  padding: 10px 24px !important;
+  background: transparent !important;
+  border: none !important;
+  color: rgba(232, 234, 240, 0.4) !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: 11px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.2s;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.theme-orbit .esim-plan-tab__btn:first-child { border-left: none; }
+
+.theme-orbit .esim-plan-tab__btn.active,
+.theme-orbit .esim-plan-tab__btn:hover {
+  background: rgba(0, 210, 255, 0.12) !important;
+  color: #00d2ff !important;
+}
+
+/* ---- Country cards (Orbit glass style) ---- */
+.theme-orbit .esim-plan-card {
+  background: var(--orbit-card-bg) !important;
+  border: 1px solid var(--orbit-border) !important;
+  border-radius: 4px !important;
+  padding: 16px 20px !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 14px !important;
+  position: relative;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+
+.theme-orbit .esim-plan-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--orbit-accent);
+  transform: scaleY(0);
+  transition: transform 0.2s;
+}
+
+.theme-orbit .esim-plan-card:hover,
+.theme-orbit .esim-plan-card:focus {
+  background: rgba(0, 210, 255, 0.05) !important;
+  border-color: rgba(0, 210, 255, 0.3) !important;
+  transform: translateX(4px) !important;
+  box-shadow: none !important;
+}
+
+.theme-orbit .esim-plan-card:hover::before { transform: scaleY(1); }
+
+.theme-orbit .esim-plan-card .flag-wrapper {
+  width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  border-radius: 4px !important;
+  flex-shrink: 0;
+  margin: 0 !important;
+}
+
+.theme-orbit .esim-plan-card .esim-plan-card__content {
+  flex: 1;
+  padding: 0 !important;
+  gap: 4px;
+}
+
+.theme-orbit .esim-plan-card .esim-plan-card__title {
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  color: #e8eaf0 !important;
+}
+
+.theme-orbit .esim-plan-card .esim-plan-card__price {
+  font-family: 'DM Mono', monospace !important;
+  font-size: 11px !important;
+  color: rgba(232, 234, 240, 0.4) !important;
+}
+
+.theme-orbit .esim-plan-card:hover .esim-plan-card__price {
+  color: var(--orbit-accent) !important;
+}
+
+.theme-orbit .esim-plan-card::after {
+  color: rgba(232, 234, 240, 0.2) !important;
+  font-size: 16px !important;
+}
+
+.theme-orbit .esim-plan-card:hover::after {
+  color: var(--orbit-accent) !important;
+}
+
+/* Button "View all" under plans */
+.theme-orbit .btn-outline--base {
+  background: transparent !important;
+  color: rgba(232, 234, 240, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding: 14px 32px !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: 13px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  border-radius: 2px !important;
+}
+
+.theme-orbit .btn-outline--base:hover {
+  border-color: rgba(0, 210, 255, 0.4) !important;
+  color: #00d2ff !important;
+  background: transparent !important;
+}
+
+/* ---- Footer ---- */
+.theme-orbit .footer-area {
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.theme-orbit .footer-widget,
+.theme-orbit .footer-widget__content,
+.theme-orbit .footer-copyright {
+  color: rgba(232, 234, 240, 0.5) !important;
+}
+
+.theme-orbit .footer-widget__title { color: #e8eaf0 !important; }
+
+.theme-orbit .footer-widget a:hover,
+.theme-orbit .footer-copyright a:hover { color: #00d2ff !important; }
+
+/* ---- Breadcrumb ---- */
+.theme-orbit .breadcrumb-item a,
+.theme-orbit .breadcrumb-item.active { color: rgba(232, 234, 240, 0.6) !important; }
+
+/* ---- Scrollbar ---- */
+.theme-orbit ::-webkit-scrollbar { width: 4px; height: 4px; }
+.theme-orbit ::-webkit-scrollbar-track { background: #050810; }
+.theme-orbit ::-webkit-scrollbar-thumb { background: rgba(0, 210, 255, 0.3); border-radius: 2px; }
+
+/* ---- Preloader ---- */
+.theme-orbit .preloader { background: #050810 !important; }
+.theme-orbit .loader-p { border-color: rgba(0, 210, 255, 0.2); border-top-color: #00d2ff; }

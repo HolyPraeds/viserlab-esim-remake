@@ -7,7 +7,7 @@
     <div class="container">
         <div class="row align-items-center gy-4">
             <div class="col-lg-6">
-                <img class="our-guarantee__thumb" src="{{ asset('assets/images/frontend/about_us_fourth/68d1daf7747841758583543.jpg') }}" alt="image">
+                <img class="our-guarantee__thumb @if(currentBrand('id') === 'travelpal') tp-section-photo @endif" src="{{ brandImage('about_us_fourth', asset('assets/images/frontend/about_us_fourth/68d1daf7747841758583543.jpg')) }}" alt="{{ currentBrand('name') }}">
             </div>
             <div class="col-lg-6 ">
                 <div class="section-heading style-left">

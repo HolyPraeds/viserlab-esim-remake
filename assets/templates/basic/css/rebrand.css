@@ -1,0 +1,104 @@
+/**
+ * REBRAND — основной цвет #712b44 (винный/бордовый)
+ * Меняй --body-bg и --section-bg чтобы поменять фон страницы и блоков.
+ */
+
+:root {
+  /* Базовый цвет #712b44 (кнопки, ссылки, акценты) */
+  --base-h: 338;
+  --base-s: 48%;
+  --base-l: 31%;
+
+  /* Фон страницы и секций (HSL без hsl(): H S% L%) */
+  /* Белый: 0 0% 100% | Светло-серый: 0 0% 97% | Лёгкий винный: 338 15% 97% */
+  --body-bg: 0 0% 100%;
+  --section-bg: 338 15% 97%;
+
+  --heading-font: "Rubik", sans-serif;
+  --body-font: "Inter", sans-serif;
+
+  --primary-h: 338;
+  --primary-s: 48%;
+  --primary-l: 31%;
+
+  --secondary-h: 229;
+  --secondary-s: 7%;
+  --secondary-l: 53%;
+
+  --surface: 0 0% 100%;
+  --text-dark: 222 47% 16%;
+  --border-light: 0 0% 93%;
+}
+
+/* Принудительно применяем фон (на случай если переменные не подхватились) */
+body {
+  background-color: hsl(var(--body-bg)) !important;
+}
+
+/* Секции с серым/винным фоном */
+.section-bg,
+.destination,
+.coverage-area,
+.choose-plan,
+.footer-area,
+[style*="section-bg"],
+[class*="section-bg"] {
+  background-color: hsl(var(--section-bg)) !important;
+}
+
+/* Переопределения под тему */
+.copied::after { background-color: hsl(var(--base)) !important; }
+.cookies-card__icon { background-color: hsl(var(--base)) !important; }
+.select2-dropdown { box-shadow: 0 3px 9px hsl(var(--text-dark) / 0.05), 6px 4px 19px hsl(var(--base) / 0.2) !important; }
+.select2-container--default .select2-search--dropdown .select2-search__field:focus { box-shadow: 0 0 25px hsl(var(--base) / 0.15) !important; }
+
+.btn-currency {
+  padding: 5px 12px;
+  border: 1px solid hsl(var(--border-light));
+  background: hsl(var(--surface));
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+.btn-currency-eur[data-active="1"],
+.btn-currency-gbp[data-active="1"],
+.btn-currency-usd[data-active="1"] {
+  background: hsl(var(--base)) !important;
+  color: #fff !important;
+  border-color: hsl(var(--base)) !important;
+}
+
+/* Logos: no card/panel background behind PNGs */
+.header .navbar-brand,
+.header .navbar-brand img,
+.footer-item__logo,
+.footer-item__logo img {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+
+.sidebar__main-logo,
+.sidebar__main-logo img {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Country search dropdown — float above next section (not clipped by hero) */
+.banner-section,
+.destination-top {
+  overflow: visible !important;
+}
+
+.banner-section .search-box,
+.destination .search-box {
+  position: relative;
+  z-index: 1200;
+}
+
+.search-box.show .search-box-result {
+  z-index: 1201 !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}

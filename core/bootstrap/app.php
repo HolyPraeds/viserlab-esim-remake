@@ -48,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\LanguageMiddleware::class,
+            \App\Http\Middleware\DetectBrand::class,
             \App\Http\Middleware\ActiveTemplateMiddleware::class,
         ]);
 

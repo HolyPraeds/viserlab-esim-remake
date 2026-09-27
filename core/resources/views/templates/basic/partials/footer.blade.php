@@ -26,8 +26,8 @@
             <div class="row justify-content-between gy-5">
                 <div class="col-xl-4 col-sm-6 col-xsm-6">
                     <div class="footer-item">
-                        <a class="footer-item__logo" href="{{ route('home') }}">
-                            <img src="{{ siteLogo() }}" alt="logo">
+                        <a class="footer-item__logo {{ currentBrand('footer_logo_class') }}" href="{{ route('home') }}">
+                            <img src="{{ siteLogo() }}" alt="{{ currentBrand('name') }}">
                         </a>
                         <p class="footer-item__desc">TravelSim is a leading provider of eSIM services, offering seamless and hassle-free connectivity for travelers, digital nomads, and businesses worldwide. With our innovative eSIM technology, you can enjoy instant activation and coverage in multiple countries.</p>
                         <ul class="social-list">

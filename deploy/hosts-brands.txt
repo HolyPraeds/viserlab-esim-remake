@@ -1,0 +1,3 @@
+127.0.0.1 travelsim.test
+127.0.0.1 payersim.test
+127.0.0.1 travelpal.test

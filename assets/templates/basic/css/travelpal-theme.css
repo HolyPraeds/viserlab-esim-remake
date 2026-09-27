@@ -1,0 +1,337 @@
+.theme-travelpal {
+  --travelpal-primary: #52c3c9;
+  --travelpal-primary-dark: #35a9b0;
+  --travelpal-surface: #ffffff;
+  --travelpal-text: #101010;
+  --travelpal-header-height: 88px;
+}
+
+.theme-travelpal body,
+body.theme-travelpal {
+  background: var(--travelpal-surface) !important;
+  color: var(--travelpal-text);
+}
+
+.theme-travelpal .header,
+.theme-travelpal .header.fixed-header,
+.theme-travelpal .header.add-bg {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.theme-travelpal main.page-wrapper .breadcrumb {
+  padding-block-start: calc(var(--travelpal-header-height) + 48px) !important;
+}
+
+@media (max-width: 991px) {
+  .theme-travelpal {
+    --travelpal-header-height: 72px;
+  }
+
+  .theme-travelpal .banner-section {
+    --this-pt: calc(var(--travelpal-header-height) + 24px);
+    --this-pb: 40px;
+  }
+
+  .theme-travelpal .banner-image {
+    max-width: 280px;
+    margin-top: 16px;
+  }
+
+  .theme-travelpal main.page-wrapper .breadcrumb {
+    padding-block-start: calc(var(--travelpal-header-height) + 30px) !important;
+  }
+}
+
+.theme-travelpal .btn--base,
+.theme-travelpal .btn-currency.active {
+  background: var(--travelpal-primary) !important;
+  border-color: var(--travelpal-primary) !important;
+  color: #000000 !important;
+}
+
+.theme-travelpal .btn--base:hover,
+.theme-travelpal .btn-currency:hover {
+  background: var(--travelpal-primary-dark) !important;
+  border-color: var(--travelpal-primary-dark) !important;
+  color: #000000 !important;
+}
+
+.theme-travelpal .banner-section {
+  background: linear-gradient(135deg, #e9f9fa 0%, #d3f1f3 45%, #ffffff 100%) !important;
+  --this-pt: calc(var(--travelpal-header-height) + 36px);
+  --this-pb: 56px;
+  padding-top: var(--this-pt) !important;
+  padding-bottom: var(--this-pb) !important;
+  position: relative;
+  z-index: 20;
+  overflow: visible;
+}
+
+.theme-travelpal .banner-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+.theme-travelpal .banner-section .row {
+  align-items: center;
+}
+
+.theme-travelpal .banner-content {
+  padding-top: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.theme-travelpal .banner-image {
+  max-width: 400px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+/* Search dropdown floats over coverage / tabs below */
+.theme-travelpal .banner-section .search-box,
+.theme-travelpal .destination .search-box {
+  position: relative;
+  z-index: 1200;
+}
+
+.theme-travelpal .search-box-result {
+  position: absolute !important;
+  left: 0;
+  right: 0;
+  top: calc(100% + 12px) !important;
+  z-index: 1201 !important;
+  max-height: min(420px, 55vh) !important;
+  overflow-y: auto !important;
+  box-shadow: 0 12px 40px rgba(16, 16, 16, 0.15);
+  border-radius: 10px;
+}
+
+.theme-travelpal .search-box:not(.show) .search-box-result {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.theme-travelpal .search-box.show .search-box-result {
+  visibility: visible;
+  opacity: 1;
+}
+
+.theme-travelpal .search-box-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theme-travelpal .search-box-list__item {
+  flex-shrink: 0;
+}
+
+.theme-travelpal .coverage-area,
+.theme-travelpal .destination,
+.theme-travelpal .choose-plan,
+.theme-travelpal .breadcrumb,
+.theme-travelpal .footer-area,
+.theme-travelpal .service-section {
+  position: relative;
+  z-index: 1;
+  background-color: var(--travelpal-surface) !important;
+}
+
+.theme-travelpal .coverage-area .esim-plan-tab,
+.theme-travelpal .coverage-area .tab-content,
+.theme-travelpal .destination-top {
+  position: relative;
+  z-index: 1;
+}
+
+.theme-travelpal .banner-section,
+.theme-travelpal .destination-top {
+  overflow: visible !important;
+}
+
+.theme-travelpal .section-heading__title,
+.theme-travelpal .esim-plan-card__title,
+.theme-travelpal .choose-plan-item__capacity {
+  color: #101010 !important;
+}
+
+/* Logo — override main.css max-height: 35px */
+.theme-travelpal .tp-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.theme-travelpal .tp-logo--header {
+  width: auto;
+  height: auto;
+  padding: 6px 0;
+  margin-right: 12px;
+}
+
+.theme-travelpal .header .navbar-brand img,
+.theme-travelpal .tp-logo--header img,
+.theme-travelpal .tp-header-logo-img {
+  display: block;
+  width: auto !important;
+  height: 56px !important;
+  max-width: min(240px, 42vw) !important;
+  max-height: 56px !important;
+  object-fit: contain !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.theme-travelpal .tp-logo--footer {
+  width: auto;
+  height: auto;
+  padding: 0;
+}
+
+.theme-travelpal .footer-item__logo img,
+.theme-travelpal .tp-logo--footer img {
+  display: block;
+  width: auto !important;
+  height: 48px !important;
+  max-width: 200px !important;
+  max-height: 48px !important;
+  object-fit: contain !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Homepage section photos — travel look, not boxed stock tiles */
+.theme-travelpal .tp-section-photo,
+.theme-travelpal .banner-image {
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 16px 48px rgba(16, 16, 16, 0.12);
+}
+
+.theme-travelpal .footer-payment-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 0 0.5rem;
+}
+
+.theme-travelpal .footer-payment-badges img {
+  height: 28px;
+  width: auto;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+@media (max-width: 991px) {
+  .theme-travelpal .header .navbar-brand img,
+  .theme-travelpal .tp-logo--header img,
+  .theme-travelpal .tp-header-logo-img {
+    height: 44px !important;
+    max-height: 44px !important;
+    max-width: min(200px, 55vw) !important;
+  }
+
+  .theme-travelpal .footer-item__logo img,
+  .theme-travelpal .tp-logo--footer img {
+    height: 40px !important;
+    max-height: 40px !important;
+  }
+}
+
+/* Country flags: keep native ratio and avoid blur */
+.theme-travelpal .flag-wrapper {
+  width: 96px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.theme-travelpal .flag-wrapper .flag-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Replace brand logos with benefit ticker */
+.theme-travelpal .tp-benefits-strip {
+  overflow: hidden;
+  border: 1px solid rgba(82, 195, 201, 0.35);
+  border-radius: 14px;
+  background: #f5fcfd;
+  padding: 12px 0;
+}
+
+.theme-travelpal .tp-benefits-strip__inner {
+  display: flex;
+  width: max-content;
+  animation: tpBenefitsScroll 28s linear infinite;
+}
+
+.theme-travelpal .tp-benefits-strip__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px;
+  white-space: nowrap;
+  color: #0b4950;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.theme-travelpal .tp-benefits-strip__item::before {
+  content: "•";
+  color: #35a9b0;
+}
+
+.theme-travelpal .tp-benefits-grid {
+  display: none;
+}
+
+@keyframes tpBenefitsScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
+
+@media (max-width: 767px) {
+  .theme-travelpal .tp-benefits-strip {
+    display: none;
+  }
+
+  .theme-travelpal .tp-benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .theme-travelpal .tp-benefits-grid__item {
+    border: 1px solid rgba(82, 195, 201, 0.35);
+    border-radius: 10px;
+    background: #f5fcfd;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0b4950;
+    text-align: center;
+  }
+}

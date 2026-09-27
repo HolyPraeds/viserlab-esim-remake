@@ -25,7 +25,7 @@
                 </ul>
             </div>
             <div class="col-lg-6">
-                <img class="best-pricing-section__thumb" src="{{ asset('assets/images/frontend/about_us_third/68d1db109851d1758583568.jpg') }}" alt="image">
+                <img class="best-pricing-section__thumb @if(currentBrand('id') === 'travelpal') tp-section-photo @endif" src="{{ brandImage('about_us_third', asset('assets/images/frontend/about_us_third/68d1db109851d1758583568.jpg')) }}" alt="{{ currentBrand('name') }}">
             </div>
         </div>
     </div>

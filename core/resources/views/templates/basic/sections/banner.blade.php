@@ -2,7 +2,7 @@
     $bannerContent = getContent('banner.content', true);
 @endphp
 
-<section class="banner-section bg-img" data-background-image="{{ frontendImage('banner', $bannerContent?->data_values?->banner_bg, '2030x810') }}">
+<section class="banner-section bg-img" data-background-image="{{ brandImage('banner_bg', frontendImage('banner', $bannerContent?->data_values?->banner_bg, '2030x810')) }}">
     <div class="container">
         <div class="row justify-content-center align-items-center flex-wrap-reverse gy-4">
             <div class="col-md-10 col-lg-7">
@@ -36,7 +36,7 @@
             </div>
 
             <div class="col-md-10 col-lg-5">
-                <img class="banner-image" src="{{ frontendImage('banner', $bannerContent?->data_values?->banner_image, '1050x1040') }}" alt="banner-image">
+                <img class="banner-image" src="{{ brandImage('banner_image', frontendImage('banner', $bannerContent?->data_values?->banner_image, '1050x1040')) }}" alt="{{ currentBrand('name') }}">
             </div>
         </div>
     </div>

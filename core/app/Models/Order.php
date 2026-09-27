@@ -3,11 +3,26 @@
 namespace App\Models;
 
 use App\Constants\Status;
+use App\Support\BrandContext;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(function (Order $order) {
+            if (empty($order->brand)) {
+                $order->brand = BrandContext::id();
+            }
+        });
+    }
+
+    public function brandName(): string
+    {
+        return BrandContext::name($this->brand);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
