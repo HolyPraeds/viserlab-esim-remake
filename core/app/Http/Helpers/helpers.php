@@ -68,6 +68,13 @@ function activeTemplateName() {
     return $template;
 }
 
+function stripeBlockedCountryCodes(): array
+{
+    $codes = config('compliance.stripe_blocked_country_codes', []);
+
+    return array_values(array_unique(array_map('strtoupper', $codes)));
+}
+
 function currentBrand(?string $key = null) {
     $brand = BrandContext::current();
     if ($key === null) {
@@ -608,7 +615,10 @@ function finalizePendingAlpPayDepositsForUser(?\App\Models\User $user): void
 
 function getCachedCountries() {
     return Cache::rememberForever('active_countries_with_plans', function () {
-        return Country::with('plans.region')->active()->get();
+        return Country::with('plans.region')
+            ->active()
+            ->whereNotIn('code', stripeBlockedCountryCodes())
+            ->get();
     });
 }
 
@@ -950,6 +960,7 @@ function getGlobalRegionsForFrontend(): array {
 
 function getCountries() {
     return Country::active()->where('is_featured', Status::ENABLE)
+        ->whereNotIn('code', stripeBlockedCountryCodes())
         ->whereHas('plans', function ($query) {
             $query->active()->withPositivePrice()->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
         })

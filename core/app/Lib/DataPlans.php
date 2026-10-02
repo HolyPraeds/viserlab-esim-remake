@@ -220,7 +220,9 @@ class DataPlans {
             $plan->prepaid_currency = $item['currencyCode'];
             $plan->reloadable       = "true";
             $plan->phone_number     = "true";
-            $plan->status           = ($customerPrice >= 0.01) ? 1 : 0;
+            $locationCode = strtoupper($cleanLocationCode);
+            $blockedLocation = in_array($locationCode, stripeBlockedCountryCodes(), true);
+            $plan->status           = (!$blockedLocation && $customerPrice >= 0.01) ? 1 : 0;
             $plan->operator_name    = "UNDEFINED";
             $plan->operator_slug    = "undefined";
             $plan->region_id        = $region ? $region->id : null;
@@ -229,7 +231,6 @@ class DataPlans {
             $countryIds = [];
 
             // Only attach to a country if locationCode is a 2-letter country code (ISO alpha-2)
-            $locationCode = strtoupper($cleanLocationCode);
             $isCountryCode = (bool) preg_match('/^[A-Z]{2}$/', $locationCode);
 
             if ($isCountryCode) {

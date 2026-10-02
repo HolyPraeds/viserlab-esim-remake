@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class PlanController extends Controller {
     private function prohibitedCountryCodes(): array
     {
-        return ['RU', 'BY', 'IR', 'SY', 'KP', 'MM', 'VE', 'AF', 'LY', 'SD', 'YE'];
+        return stripeBlockedCountryCodes();
     }
 
     private function isPlanInProhibitedJurisdiction(Plan $plan): bool

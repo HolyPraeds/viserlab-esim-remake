@@ -18,6 +18,7 @@ class ApiController extends Controller
     {
         try {
             $countries = Country::active()
+                ->whereNotIn('code', stripeBlockedCountryCodes())
                 ->with(['plans' => function ($query) {
                     $query->active()
                         ->withPositivePrice()
@@ -69,6 +70,7 @@ class ApiController extends Controller
                     ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
             }])
             ->active()
+            ->whereNotIn('code', stripeBlockedCountryCodes())
             ->where('slug', $slug)
             ->first();
 
@@ -132,7 +134,7 @@ class ApiController extends Controller
                 ->with(['plans' => function ($query) {
                     $query->active()
                         ->withPositivePrice()
-                        ->whereHas('countries', fn($q) => $q->active());
+                        ->whereHas('countries', fn($q) => $q->active()->whereNotIn('code', stripeBlockedCountryCodes()));
                 }])
                 ->get()
                 ->filter(fn($region) => $region->plans->isNotEmpty())
@@ -176,7 +178,7 @@ class ApiController extends Controller
             $region = Region::with(['plans' => function ($query) {
                 $query->active()
                     ->withPositivePrice()
-                    ->whereHas('countries', fn($q) => $q->active());
+                    ->whereHas('countries', fn($q) => $q->active()->whereNotIn('code', stripeBlockedCountryCodes()));
             }])
             ->active()
             ->where('slug', $slug)
@@ -247,6 +249,7 @@ class ApiController extends Controller
             }
 
             $countries = Country::active()
+                ->whereNotIn('code', stripeBlockedCountryCodes())
                 ->where(function($q) use ($query) {
                     $q->where('name', 'like', "%{$query}%")
                       ->orWhere('code', 'like', "%{$query}%");
@@ -299,7 +302,7 @@ class ApiController extends Controller
             $plans = Plan::active()
                 ->withPositivePrice()
                 ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE))
-                ->whereHas('countries', fn($q) => $q->active())
+                ->whereHas('countries', fn($q) => $q->active()->whereNotIn('code', stripeBlockedCountryCodes()))
                 ->with(['countries', 'region', 'currency'])
                 ->get()
                 ->map(function ($plan) {
@@ -358,7 +361,7 @@ class ApiController extends Controller
             $plan = Plan::active()
                 ->withPositivePrice()
                 ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE))
-                ->whereHas('countries', fn($q) => $q->active())
+                ->whereHas('countries', fn($q) => $q->active()->whereNotIn('code', stripeBlockedCountryCodes()))
                 ->with(['countries', 'region', 'currency'])
                 ->find($id);
 

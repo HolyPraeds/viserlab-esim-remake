@@ -25,8 +25,7 @@ if (!function_exists('mapRegionNameBySlug')) {
 class SiteController extends Controller {
     private function prohibitedCountryCodes(): array
     {
-        // Compliance: do not offer services in prohibited jurisdictions.
-        return ['RU', 'BY', 'IR', 'SY', 'KP', 'MM', 'VE', 'AF', 'LY', 'SD', 'YE'];
+        return stripeBlockedCountryCodes();
     }
 
     private function parsePlanDays($period): ?int
