@@ -234,7 +234,14 @@ class DataPlans {
             $isCountryCode = (bool) preg_match('/^[A-Z]{2}$/', $locationCode);
 
             if ($isCountryCode) {
-                $countryModel = Country::where('code', $locationCode)->active()->first();
+                $lookupCodes = in_array($locationCode, ['UK', 'GB'], true) ? ['GB', 'UK'] : [$locationCode];
+                $countryModel = null;
+                foreach ($lookupCodes as $lookupCode) {
+                    $countryModel = Country::where('code', $lookupCode)->active()->first();
+                    if ($countryModel) {
+                        break;
+                    }
+                }
                 if ($countryModel) {
                     $countryIds[] = $countryModel->id;
                 }

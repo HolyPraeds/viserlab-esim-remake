@@ -79,17 +79,26 @@ class CountryController extends Controller {
 
         $data = [];
         foreach ($countries as $item) {
-            $countryExist = Country::where('code', $item['code'])->exists();
-            if (!$countryExist) {
-                $country = [];
-                $country['name'] = $item['name'];
-                $country['slug'] = Str::slug($item['name']);
-                $country['code'] = $item['code'];
-                $country['image'] = 'https://p.qrsim.net/img/flags/' . strtolower($item['code']) . '.png';
-                $country['created_at'] = now();
-                $country['updated_at'] = now();
-                $data[] = $country;
+            $code = strtoupper(trim((string) ($item['code'] ?? '')));
+            if ($code === 'UK') {
+                $code = 'GB';
             }
+            $slug = Str::slug((string) ($item['name'] ?? ''));
+            if ($code === '' || $slug === '') {
+                continue;
+            }
+            if (Country::where('code', $code)->exists() || Country::where('slug', $slug)->exists()) {
+                continue;
+            }
+
+            $data[] = [
+                'name' => $item['name'],
+                'slug' => $slug,
+                'code' => $code,
+                'image' => 'https://p.qrsim.net/img/flags/' . strtolower($code) . '.png',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
 
         if (empty($data)) {

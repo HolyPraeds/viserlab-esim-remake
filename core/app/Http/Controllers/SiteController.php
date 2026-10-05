@@ -194,17 +194,16 @@ class SiteController extends Controller {
 
     public function countryPlans($slug) {
         $country = Country::with(['plans' => function ($query) {
-            $query
-                ->active()
-                ->withPositivePrice()
-                ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
+            Country::constrainSellablePlans($query);
         }])
             ->active()
+            ->havingSellablePlans()
             ->whereNotIn('code', $this->prohibitedCountryCodes())
             ->where('slug', $slug)
-            ->firstOrFail();
+            ->orderByDesc('id')
+            ->first();
 
-        if ($country->plans->isEmpty()) {
+        if (!$country || $country->plans->isEmpty()) {
             abort(404);
         }
 

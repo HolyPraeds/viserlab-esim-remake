@@ -66,7 +66,7 @@ class TestDataSeeder extends Seeder
             ],
             [
                 'name' => 'United Kingdom',
-                'code' => 'UK',
+                'code' => 'GB',
                 'slug' => 'united-kingdom',
                 'status' => Status::ENABLE,
                 'region_id' => $europeRegion->id

@@ -65,13 +65,13 @@ class ApiController extends Controller
     {
         try {
             $country = Country::with(['plans' => function ($query) {
-                $query->active()
-                    ->withPositivePrice()
-                    ->whereHas('region', fn($q) => $q->where('status', Status::ENABLE));
+                Country::constrainSellablePlans($query);
             }])
             ->active()
+            ->havingSellablePlans()
             ->whereNotIn('code', stripeBlockedCountryCodes())
             ->where('slug', $slug)
+            ->orderByDesc('id')
             ->first();
 
             if (!$country) {
