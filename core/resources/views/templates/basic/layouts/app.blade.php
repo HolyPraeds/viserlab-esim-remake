@@ -2,6 +2,17 @@
 <html lang="{{ config('app.locale') }}" itemscope itemtype="http://schema.org/WebPage">
 
 <head>
+    @if (currentBrand('id') === 'travelsim')
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-SG5B72R2NB"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-SG5B72R2NB');
+        </script>
+    @endif
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
