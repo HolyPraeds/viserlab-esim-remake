@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Constants\Status;
 use App\Http\Controllers\Controller;
+use App\Lib\OutboundUrl;
 use App\Models\CronJob;
 use App\Models\CronJobLog;
 use App\Models\CronSchedule;
@@ -28,6 +29,8 @@ class CronConfigurationController extends Controller
             'cron_schedule_id' => 'required|integer',
             'url'              => 'required|url',
         ]);
+
+        $this->assertAllowedCronUrl($request->url);
 
         $cronJob                   = new CronJob();
         $cronJob->name             = $request->name;
@@ -56,6 +59,7 @@ class CronConfigurationController extends Controller
 
         if (!$cronJob->is_default) {
             $request->validate(['url' => 'required|url']);
+            $this->assertAllowedCronUrl($request->url);
             $cronJob->url = $request->url;
             $cronJob->alias = titleToKey($request->name);
         }
@@ -77,6 +81,16 @@ class CronConfigurationController extends Controller
 
         $notify[] = ['success', 'Cron job deleted successfully'];
         return back()->withNotify($notify);
+    }
+
+    private function assertAllowedCronUrl(string $url)
+    {
+        try {
+            OutboundUrl::assertCronUrl($url);
+        } catch (\InvalidArgumentException $e) {
+            $notify[] = ['error', 'This URL is not allowed. Cron can only call HTTPS on this site.'];
+            back()->withNotify($notify)->withInput()->throwResponse();
+        }
     }
 
     public function schedule()

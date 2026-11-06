@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Constants\Status;
 use App\Http\Controllers\Controller;
+use App\Lib\OutboundUrl;
 use App\Lib\RequiredConfig;
 use App\Models\NotificationTemplate;
 use App\Rules\FileTypeValidate;
@@ -237,6 +238,15 @@ class NotificationController extends Controller
             'custom_api_method' => 'required_if:sms_method,custom|in:get,post',
             'custom_api_url' => 'required_if:sms_method,custom',
         ]);
+
+        if ($request->sms_method === 'custom') {
+            try {
+                OutboundUrl::assertPublicHttps((string) $request->custom_api_url);
+            } catch (\InvalidArgumentException $e) {
+                $notify[] = ['error', 'This SMS API URL is not allowed'];
+                return back()->withNotify($notify)->withInput();
+            }
+        }
 
         $data = [
             'name'=>$request->sms_method,

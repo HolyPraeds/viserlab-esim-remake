@@ -45,6 +45,11 @@ class SystemController extends Controller
 
 
     public function systemUpdateProcess(){
+        return response()->json([
+            'status' => 'error',
+            'message' => ['System update from the admin panel is disabled'],
+        ]);
+
         if (gs('system_customized')) {
             return response()->json([
                 'status'=>'error',

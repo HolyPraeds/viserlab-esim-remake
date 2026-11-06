@@ -3,6 +3,7 @@
 namespace App\Notify;
 
 use App\Lib\CurlRequest;
+use App\Lib\OutboundUrl;
 use MessageBird\Client as MessageBirdClient;
 use MessageBird\Objects\Message;
 use App\Notify\Textmagic\Services\TextmagicRestClient;
@@ -105,6 +106,7 @@ class SmsGateway{
 
 	public function custom(){
 		$credential = $this->config->custom;
+		OutboundUrl::assertPublicHttps((string) $credential->url);
 		$method = $credential->method;
 		$shortCodes = [
 			'{{message}}'=>$this->message,

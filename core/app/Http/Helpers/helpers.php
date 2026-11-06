@@ -54,8 +54,26 @@ function getNumber($length = 8) {
     return $randomString;
 }
 
+function safeTemplateName($name): string
+{
+    if (!is_string($name)) {
+        return 'basic';
+    }
+
+    $name = strtolower(trim($name));
+    if (preg_match('/^[a-z0-9_-]+$/', $name) !== 1) {
+        return 'basic';
+    }
+
+    if (!is_dir(resource_path('views/templates/'.$name))) {
+        return 'basic';
+    }
+
+    return $name;
+}
+
 function activeTemplate($asset = false) {
-    $template = session('template') ?? gs('active_template');
+    $template = safeTemplateName(session('template') ?? gs('active_template'));
     if ($asset) {
         return 'assets/templates/' . $template . '/';
     }
@@ -64,8 +82,7 @@ function activeTemplate($asset = false) {
 }
 
 function activeTemplateName() {
-    $template = session('template') ?? gs('active_template');
-    return $template;
+    return safeTemplateName(session('template') ?? gs('active_template'));
 }
 
 function stripeBlockedCountryCodes(): array

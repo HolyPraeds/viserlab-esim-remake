@@ -35,9 +35,15 @@ class FrontendController extends Controller
 
     public function templatesActive(Request $request)
     {
+        $name = strtolower(trim((string) $request->name));
+        if (safeTemplateName($name) !== $name) {
+            $notify[] = ['error', 'Unknown template'];
+            return back()->withNotify($notify);
+        }
+
         $general = gs();
 
-        $general->active_template = $request->name;
+        $general->active_template = $name;
         $general->save();
 
         $notify[] = ['success', strtoupper($request->name).' template activated successfully'];

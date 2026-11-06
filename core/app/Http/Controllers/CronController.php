@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Constants\Status;
 use App\Lib\CurlRequest;
+use App\Lib\OutboundUrl;
 use App\Lib\CurrencyLayer;
 use App\Models\CronJob;
 use App\Models\CronJobLog;
@@ -40,7 +41,10 @@ class CronController extends Controller {
                 }
             } else {
                 try {
+                    OutboundUrl::assertCronUrl((string) $cron->url);
                     CurlRequest::curlContent($cron->url);
+                } catch (\InvalidArgumentException $e) {
+                    $cronLog->error = 'Blocked URL';
                 } catch (\Exception $e) {
                     $cronLog->error = $e->getMessage();
                 }
