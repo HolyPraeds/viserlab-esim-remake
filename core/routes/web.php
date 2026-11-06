@@ -82,5 +82,3 @@ Route::middleware(['auth', 'check.status', 'registration.complete'])->controller
 Route::post('webhooks/alppay', [\App\Http\Controllers\Gateway\AlpPayController::class, 'webhook'])->name('webhooks.alppay');
 // Local check (GET) fallback
 Route::get('webhooks/alppay', [\App\Http\Controllers\Gateway\AlpPayController::class, 'check'])->name('webhooks.alppay.check');
-// DEV ONLY: force confirm on localhost
-Route::get('webhooks/alppay/force', [\App\Http\Controllers\Gateway\AlpPayController::class, 'force'])->name('webhooks.alppay.force');

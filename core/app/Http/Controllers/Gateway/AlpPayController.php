@@ -241,6 +241,8 @@ class AlpPayController extends Controller
     // DEV ONLY: force confirm last tracked deposit (use on localhost)
     public function force(Request $request)
     {
+        abort(404);
+
         $track = $request->get('trx') ?: session()->get('Track');
         $deposit = Deposit::where('trx', $track)->firstOrFail();
         if (in_array($deposit->status, [Status::PAYMENT_INITIATE, Status::PAYMENT_PENDING])) {
