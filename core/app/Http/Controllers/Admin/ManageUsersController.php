@@ -9,6 +9,7 @@ use App\Models\Esim;
 use App\Models\NotificationLog;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Rules\BlockedEmailDomain;
 use App\Rules\FileTypeValidate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -159,7 +160,7 @@ class ManageUsersController extends Controller
         $request->validate([
             'firstname' => 'required|string|max:40',
             'lastname'  => 'required|string|max:40',
-            'email'     => 'required|email|string|max:40|unique:users,email,' . $user->id,
+            'email'     => ['required', 'email', 'string', 'max:40', 'unique:users,email,' . $user->id, new BlockedEmailDomain],
             'mobile'    => 'required|string|max:40',
             'country'   => 'required|in:' . $countries,
         ]);

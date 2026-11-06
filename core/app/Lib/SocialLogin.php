@@ -6,6 +6,7 @@ use App\Constants\Status;
 use App\Models\AdminNotification;
 use App\Models\User;
 use App\Models\UserLogin;
+use App\Rules\BlockedEmailDomain;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -70,6 +71,9 @@ class SocialLogin
             $emailExists = User::where('email', isset($user->email) ? $user->email : '')->exists();
             if ($emailExists) {
                 throw new Exception('Email already exists');
+            }
+            if (BlockedEmailDomain::blocks((string) ($user->email ?? ''))) {
+                throw new Exception('This email address is not allowed');
             }
 
             $userData = $this->createUser($user, $this->provider);

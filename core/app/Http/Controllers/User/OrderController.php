@@ -8,6 +8,7 @@ use App\Http\Controllers\Gateway\PaymentController;
 use App\Models\Deposit;
 use App\Models\GatewayCurrency;
 use App\Models\Order;
+use App\Rules\BlockedEmailDomain;
 use Illuminate\Http\Request;
 use App\Services\OrderEmailService;
 use App\Services\TaurixyService;
@@ -174,7 +175,7 @@ class OrderController extends Controller {
             'order_id' => 'required|integer|exists:orders,id',
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|email',
+            'email' => ['required', 'email', new BlockedEmailDomain],
             'phone' => 'required|string',
             'payment_method' => 'nullable|string',
             'country' => 'nullable|string',

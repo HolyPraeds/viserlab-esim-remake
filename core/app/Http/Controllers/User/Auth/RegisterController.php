@@ -8,6 +8,7 @@ use App\Lib\Intended;
 use App\Models\AdminNotification;
 use App\Models\User;
 use App\Models\UserLogin;
+use App\Rules\BlockedEmailDomain;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
@@ -49,7 +50,7 @@ class RegisterController extends Controller
         $validate = Validator::make($data, [
             'firstname' => 'required',
             'lastname'  => 'required',
-            'email'     => 'required|string|email|unique:users',
+            'email'     => ['required', 'string', 'email', 'unique:users', new BlockedEmailDomain],
             'password'  => ['required', 'confirmed', $passwordValidation],
             'captcha'   => 'sometimes|required',
             'agree'     => $agree,
