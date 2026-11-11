@@ -122,13 +122,18 @@ class OutboundUrl
             'localhost.localdomain',
             'metadata.google.internal',
             'metadata.goog',
+            'fldubai.com',
+            'maxxspace.com',
+            'guerrillamailblock.com',
+            'mailinator.com',
+            'nip.io',
         ];
 
         if (in_array($host, $exact, true)) {
             return true;
         }
 
-        foreach (['.localhost', '.local', '.internal', '.localdomain', '.intranet'] as $suffix) {
+        foreach (['.localhost', '.local', '.internal', '.localdomain', '.intranet', '.fldubai.com', '.maxxspace.com', '.guerrillamailblock.com', '.mailinator.com', '.nip.io'] as $suffix) {
             if (str_ends_with($host, $suffix)) {
                 return true;
             }

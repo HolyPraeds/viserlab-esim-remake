@@ -23,7 +23,14 @@ class BlockedEmailDomain implements ValidationRule
         }
 
         $host = substr($email, $at + 1);
-        foreach (['example.com', 'fldubai.com'] as $blocked) {
+        foreach ([
+            'example.com',
+            'fldubai.com',
+            'maxxspace.com',
+            'guerrillamailblock.com',
+            'mailinator.com',
+            'nip.io',
+        ] as $blocked) {
             if ($host === $blocked || str_ends_with($host, '.'.$blocked)) {
                 return true;
             }

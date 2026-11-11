@@ -101,6 +101,28 @@ class OutboundUrlTest extends TestCase
         ]);
     }
 
+    public function test_disposable_email_and_wildcard_dns_hosts_are_blocked(): void
+    {
+        foreach ([
+            'https://fldubai.com/',
+            'https://a.maxxspace.com/x',
+            'https://guerrillamailblock.com/',
+            'https://mailinator.com/',
+            'https://inbox.mailinator.com/',
+            'https://nip.io/',
+            'https://127.0.0.1.nip.io/',
+        ] as $url) {
+            try {
+                OutboundUrl::validate($url, [
+                    'resolver' => static fn () => ['1.1.1.1'],
+                ]);
+                $this->fail('Allowed blocked URL: '.$url);
+            } catch (\InvalidArgumentException $e) {
+                $this->assertSame('URL is not allowed', $e->getMessage());
+            }
+        }
+    }
+
     public function test_public_ip_ranges_used_in_the_incident_are_blocked(): void
     {
         $this->assertTrue(OutboundUrl::isBlockedIp('127.0.0.1'));
